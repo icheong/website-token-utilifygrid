@@ -1,0 +1,269 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>TokenMetric | Compare Inference Rates</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .caret-blink::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: #0b57d0;
+            margin-left: 2px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .mono-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .custom-shadow {
+            box-shadow: 0 4px 12px rgba(0,0,0,.04);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#7ec1ff",
+                        "secondary-dark": "#7fcfff",
+                        "tertiary": "#802b00",
+                        "surface": "#faf8ff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-surface-variant": "#424654",
+                        "on-tertiary-container": "#ffcfbe",
+                        "on-tertiary-fixed": "#370e00",
+                        "secondary-fixed": "#cee5ff",
+                        "tertiary-fixed": "#ffdbce",
+                        "surface-container-highest": "#e1e2ec",
+                        "secondary": "#00639b",
+                        "surface-variant": "#e1e2ec",
+                        "surface-bright": "#faf8ff",
+                        "secondary-fixed-dim": "#96cbff",
+                        "on-primary-fixed": "#001847",
+                        "surface-container-high": "#e7e7f2",
+                        "on-secondary-fixed-variant": "#004a76",
+                        "primary-container": "#0b57d0",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#2e3038",
+                        "surface-container-light": "#f0f4f9",
+                        "primary-container-dark": "#1f3760",
+                        "surface-tint": "#0856cf",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#0040a1",
+                        "on-background": "#191b23",
+                        "success": "#146c2e",
+                        "on-primary-container": "#ced9ff",
+                        "primary": "#0041a2",
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "on-primary": "#ffffff",
+                        "warning": "#f9ab00",
+                        "on-secondary-container": "#004f7d",
+                        "outline": "#737785",
+                        "error": "#b3261e",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "primary-container-light": "#d3e3fd",
+                        "inverse-on-surface": "#f0f0fb",
+                        "inverse-primary": "#b2c5ff",
+                        "on-secondary-fixed": "#001d33",
+                        "background": "#faf8ff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-dim": "#d9d9e4",
+                        "surface-container-dark": "#282a2c",
+                        "on-error-container": "#93000a",
+                        "primary-dark": "#a8c7fa",
+                        "surface-container": "#ededf8",
+                        "on-surface": "#191b23",
+                        "tertiary-container": "#a83b00",
+                        "surface-container-low": "#f3f3fd",
+                        "primary-fixed": "#dae2ff",
+                        "outline-variant": "#c3c6d6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "component-gap": "0.75rem",
+                        "margin-mobile": "1rem",
+                        "gutter": "1rem",
+                        "margin-desktop": "2rem"
+                    },
+                    "fontFamily": {
+                        "metric-display": ["JetBrains Mono"],
+                        "label-mono": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "metric-display": ["32px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "label-mono": ["12px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "headline-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+<!-- TopNavBar -->
+<nav class="w-full top-0 sticky bg-surface border-b border-outline-variant z-50 transition-all duration-200 ease-in-out">
+<div class="flex justify-between items-center px-margin-desktop py-4 max-w-7xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="font-label-mono text-metric-display tracking-tight text-primary">Tokens</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="font-body-md text-body-md text-primary border-b-2 border-primary pb-1 transition-colors duration-200" href="#">Models</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Pricing</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">API</a>
+<a class="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors duration-200" href="#">Docs</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:block relative">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">search</span>
+<input class="bg-surface-container-light border-none rounded-xl py-2 pl-10 pr-4 text-body-md focus:ring-2 focus:ring-primary-container-light w-64 transition-all" placeholder="Quick search..." type="text">
+</div>
+<button class="bg-primary-container text-white px-6 py-2.5 rounded-xl font-body-md font-semibold hover:bg-primary transition-colors">Sign Up</button>
+</div>
+</div>
+</nav>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="max-w-7xl mx-auto px-margin-desktop pt-24 pb-16 text-center">
+<div class="mb-4 inline-block px-3 py-1 bg-surface-container rounded-full">
+<span class="font-label-mono text-label-mono text-on-surface-variant tracking-wider uppercase">v2.4.0 STABLE • REAL-TIME COST ANALYSIS • MULTI-PROVIDER BENCHMARKS</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-8 max-w-4xl mx-auto leading-tight">
+                Compare raw API token rates across every inference provider
+            </h1>
+<!-- Command Line Search -->
+<div class="max-w-2xl mx-auto relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary-container to-secondary-container rounded-xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+<div class="relative bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex items-center shadow-sm">
+<span class="mono-font text-primary mr-3 select-none">$</span>
+<div class="flex-grow text-left">
+<span class="mono-font text-on-surface-variant caret-blink">Price for 'llama-3-70b' on DeepInfra...</span>
+</div>
+<kbd class="hidden md:flex items-center gap-1 font-label-mono text-[10px] px-2 py-1 bg-surface-container rounded border border-outline-variant text-outline">
+<span class="material-symbols-outlined text-[12px]">keyboard_command_key</span>K
+                    </kbd>
+</div>
+</div>
+<!-- Trending Matchups -->
+<div class="mt-8 flex flex-wrap justify-center gap-component-gap max-w-3xl mx-auto">
+<div class="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface-variant hover:border-primary-container hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="font-label-mono text-[10px] text-outline">PROMPT</span>
+                    Llama 3.3 70B: DeepInfra vs Together AI
+                </div>
+<div class="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface-variant hover:border-primary-container hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="font-label-mono text-[10px] text-outline">PROMPT</span>
+                    DeepSeek V3: Groq vs Together AI
+                </div>
+<div class="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface-variant hover:border-primary-container hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="font-label-mono text-[10px] text-outline">PROMPT</span>
+                    Claude 3.5: AWS vs GCP
+                </div>
+</div>
+</section>
+<!-- Data Section -->
+<section class="bg-surface-container-low py-24">
+<div class="max-w-7xl mx-auto px-margin-desktop grid md:grid-cols-2 gap-16 items-center">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-6">Data-driven decisions for your AI architecture</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-10 leading-relaxed max-w-lg">
+                        Stop guessing about token overhead. Our protocol monitors latency spikes and pricing shifts across 40+ endpoints every minute, giving you the edge in inference optimization.
+                    </p>
+<div class="grid grid-cols-2 gap-6">
+<div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
+<div class="font-metric-display text-metric-display text-primary mb-1">0.02ms</div>
+<div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Median Latency</div>
+</div>
+<div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
+<div class="font-metric-display text-metric-display text-success mb-1">99.9%</div>
+<div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Uptime Index</div>
+</div>
+<div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
+<div class="font-metric-display text-metric-display text-secondary mb-1">40+</div>
+<div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Providers Indexed</div>
+</div>
+<div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
+<div class="font-metric-display text-metric-display text-warning mb-1">&lt;1$</div>
+<div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Avg 1M Token Cost</div>
+</div>
+</div>
+</div>
+<div class="relative">
+<div class="absolute inset-0 bg-primary-container-light opacity-20 blur-3xl rounded-full"></div>
+<div class="relative bg-surface border border-outline-variant rounded-xl overflow-hidden custom-shadow">
+<div class="bg-surface-container p-4 border-b border-outline-variant flex items-center justify-between">
+<div class="flex gap-1.5">
+<div class="w-2.5 h-2.5 rounded-full bg-error/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-warning/40"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-success/40"></div>
+</div>
+<div class="font-label-mono text-[10px] text-outline">LIVE_BENCHMARK_DASHBOARD</div>
+</div>
+<div class="p-8">
+<img class="w-full h-auto rounded-lg" data-alt="A clean, professional technical dashboard interface featuring real-time line charts comparing token latency between different AI providers. The aesthetic is modern and light-mode focused, using a palette of crisp whites, soft grays, and primary royal blue accents. High-contrast data tables with monospaced text display provider names and numerical values, evoking a sense of engineering precision and high-performance reliability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_tBD5KXdn3K7xk1EI_fbhpojxqJ7IWHc95oAiZHFHJRpvw9YcEA4zNxiGudZfC-WUbJmqpixHM4b67dfSfWWjrdF6FKzal8SW6RFgvJt7yiky5wRDWAzwn6SjBtVIc-7zcQt0cnvsknewJwAeZJFHcSFzwno4FQQSbeRdlBfn3dLx-yueQIMHGcBDBza2UAA78fdj0WmdiEcWRTDGYDznv13HAeNuMlNZc3tRl7x-89GKTey--xI-8sEXdl2fSClxc9GdYubdepNF">
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Sponsor Section -->
+<section class="py-16 border-t border-outline-variant">
+<div class="max-w-7xl mx-auto px-margin-desktop text-center">
+<p class="font-label-mono text-label-mono text-outline uppercase tracking-[0.2em] mb-10">Sponsor Spotlight</p>
+<div class="flex justify-center items-center">
+<div class="group relative p-6 bg-surface rounded-xl border border-outline-variant transition-all hover:border-primary/50 flex flex-col items-center gap-4">
+<img alt="UtilifyGrid Logo" class="h-12 w-auto opacity-80 group-hover:opacity-100 transition-opacity" src="https://lh3.googleusercontent.com/aida/AP1WRLuznHNrHqQoyRvdDBu55rpCGzfPmVyGM3ItLzRgyUwQ6wePWek5iYlb9ngrT3-zCDR28N8GUtyqGEyAlQFBpc2qwFJfNIrp2bJF8z2zF8cw4dC0WKCp2sn_N-d2mg-HDf6HC79gWauNNPlqcjzT9R00Hzfwf_jSo0yqKffNHh-JoMfdRr_6gMfkNernE3EdXJETD9Vcf3s64tq3SgknCr1PfQbAJ-8KpESDDMoDTZ5JY7xs4vqxcmjq6J75">
+<div class="font-body-md text-[13px] text-on-surface-variant italic">"Empowering the next generation of token-based economies."</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full mt-auto bg-surface-container-low border-t border-outline-variant">
+<div class="flex flex-col md:flex-row justify-between items-center px-margin-desktop py-8 max-w-7xl mx-auto gap-component-gap">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-label-mono text-headline-md text-on-surface">Tokens</span>
+<p class="font-label-mono text-label-mono text-secondary">© 2026 Tokens | UtilifyGrid. All rights reserved.</p>
+</div>
+<div class="flex gap-6">
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-opacity duration-200 underline" href="#">Status</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-opacity duration-200 underline" href="#">GitHub</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-opacity duration-200 underline" href="#">Privacy</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-opacity duration-200 underline" href="#">Terms</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-opacity duration-200 underline" href="#">Sponsors</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for the search bar
+        document.addEventListener('keydown', (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                console.log('Search focused');
+            }
+        });
+    </script>
+
+
+</body></html>

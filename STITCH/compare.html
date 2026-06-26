@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Model Comparison Workspace - TokenMetrics AI</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e7e7f2",
+                        "surface-container": "#ededf8",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#ffcfbe",
+                        "surface": "#faf8ff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#96cbff",
+                        "surface-dim": "#d9d9e4",
+                        "success": "#146c2e",
+                        "surface-tint": "#0856cf",
+                        "surface-container-highest": "#e1e2ec",
+                        "surface-variant": "#e1e2ec",
+                        "warning": "#f9ab00",
+                        "secondary-fixed": "#cee5ff",
+                        "inverse-surface": "#2e3038",
+                        "on-secondary-fixed-variant": "#004a76",
+                        "on-surface-variant": "#424654",
+                        "on-tertiary-fixed": "#370e00",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-secondary-fixed": "#001d33",
+                        "secondary-dark": "#7fcfff",
+                        "on-error-container": "#93000a",
+                        "primary-container": "#0b57d0",
+                        "primary": "#0041a2",
+                        "on-primary-fixed": "#001847",
+                        "primary-container-dark": "#1f3760",
+                        "surface-container-dark": "#282a2c",
+                        "tertiary-fixed": "#ffdbce",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c3c6d6",
+                        "error-container": "#ffdad6",
+                        "secondary": "#00639b",
+                        "on-background": "#191b23",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "surface-bright": "#faf8ff",
+                        "tertiary": "#802b00",
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "secondary-container": "#7ec1ff",
+                        "surface-container-low": "#f3f3fd",
+                        "surface-container-light": "#f0f4f9",
+                        "on-secondary": "#ffffff",
+                        "error": "#b3261e",
+                        "primary-dark": "#a8c7fa",
+                        "outline": "#737785",
+                        "inverse-primary": "#b2c5ff",
+                        "on-secondary-container": "#004f7d",
+                        "primary-container-light": "#d3e3fd",
+                        "on-primary-fixed-variant": "#0040a1",
+                        "on-primary-container": "#ced9ff",
+                        "on-surface": "#191b23",
+                        "background": "#faf8ff",
+                        "tertiary-container": "#a83b00",
+                        "inverse-on-surface": "#f0f0fb",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dae2ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "1rem",
+                        "margin-desktop": "2rem",
+                        "gutter": "1rem",
+                        "component-gap": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "metric-display": ["JetBrains Mono"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-lg": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "metric-display": ["32px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "label-mono": ["12px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                        "headline-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .flat-layered-card {
+            background-color: white;
+            border: 1px solid #dcdfe5;
+            box-shadow: 0 4px 12px rgba(0,0,0,.04);
+            transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #0041a2;
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: scale 200ms ease;
+        }
+        .slider-thumb:active::-webkit-slider-thumb {
+            scale: 1.2;
+        }
+    </style>
+</head>
+<body class="bg-surface min-h-screen flex flex-col text-on-surface">
+<!-- TopNavBar -->
+<header class="w-full top-0 sticky bg-surface-container-lowest border-b border-outline-variant z-50">
+<div class="flex justify-between items-center h-16 px-margin-desktop max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<img alt="TokenMetrics AI Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida/AP1WRLuznHNrHqQoyRvdDBu55rpCGzfPmVyGM3ItLzRgyUwQ6wePWek5iYlb9ngrT3-zCDR28N8GUtyqGEyAlQFBpc2qwFJfNIrp2bJF8z2zF8cw4dC0WKCp2sn_N-d2mg-HDf6HC79gWauNNPlqcjzT9R00Hzfwf_jSo0yqKffNHh-JoMfdRr_6gMfkNernE3EdXJETD9Vcf3s64tq3SgknCr1PfQbAJ-8KpESDDMoDTZ5JY7xs4vqxcmjq6J75"/>
+<span class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">TokenMetrics AI</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-primary font-bold border-b-2 border-primary py-4 hover:text-primary transition-colors duration-200" href="#">Workspace</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Models</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Compute</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="px-4 py-2 bg-primary-container-light text-primary font-bold rounded-xl transition-all duration-200 hover:opacity-90">Sign Up</button>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow max-w-7xl mx-auto w-full px-margin-desktop py-12">
+<div class="flex flex-col md:flex-row gap-gutter">
+<!-- LEFT COLUMN: Control Panel (30%) -->
+<aside class="w-full md:w-[30%]">
+<div class="p-6 border border-outline-variant rounded-xl bg-surface-container-lowest sticky top-24">
+<h3 class="font-headline-md text-lg mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">tune</span>
+                        Usage Parameters
+                    </h3>
+<div class="space-y-8">
+<!-- Slider 1 -->
+<div>
+<div class="flex justify-between items-center mb-3">
+<label class="text-body-md font-medium text-on-surface-variant">Input Tokens/Req</label>
+<span class="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">1,024 t</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer slider-thumb" max="8192" min="128" step="128" type="range" value="1024"/>
+</div>
+<!-- Slider 2 -->
+<div>
+<div class="flex justify-between items-center mb-3">
+<label class="text-body-md font-medium text-on-surface-variant">Output Tokens/Req</label>
+<span class="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">512 t</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer slider-thumb" max="4096" min="64" step="64" type="range" value="512"/>
+</div>
+<!-- Slider 3 -->
+<div>
+<div class="flex justify-between items-center mb-3">
+<label class="text-body-md font-medium text-on-surface-variant">Monthly API Volume</label>
+<span class="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">1.5M req</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer slider-thumb" max="10000000" min="100000" step="100000" type="range" value="1500000"/>
+</div>
+</div>
+<div class="mt-10 pt-6 border-t border-outline-variant">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="text-sm">Compute Region</span>
+<span class="text-sm font-bold">Global (Any)</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- RIGHT COLUMN: Comparison Cards (70%) -->
+<section class="w-full md:w-[70%] space-y-gutter">
+<div class="mb-6">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Provider Price Battleground</h1>
+<div class="flex items-center gap-2 mt-1">
+<span class="px-2 py-1 bg-surface-container-highest rounded text-xs font-bold uppercase tracking-wider text-on-surface-variant">Active Model</span>
+<span class="font-label-mono text-label-mono font-bold text-primary">Llama 3.3 70B</span>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<!-- Provider A (Winner) -->
+<div class="flat-layered-card rounded-xl p-6 border-emerald-200 bg-emerald-50/10 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-3">
+<span class="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">Cheapest</span>
+</div>
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant">DI</div>
+<div>
+<h4 class="font-headline-md text-lg leading-tight">DeepInfra</h4>
+<p class="text-xs text-on-surface-variant font-label-mono">llama-3.3-70b-instruct</p>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<p class="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
+<p class="font-metric-display text-metric-display text-primary">$0.000412</p>
+</div>
+<div class="bg-white/60 p-4 rounded-lg border border-emerald-100/50">
+<p class="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
+<p class="font-metric-display text-headline-md text-on-surface">$618.00</p>
+<div class="mt-2 h-1 w-full bg-emerald-100 rounded-full overflow-hidden">
+<div class="h-full bg-success w-[60%]"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Provider B -->
+<div class="flat-layered-card rounded-xl p-6 relative overflow-hidden group">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant">TAI</div>
+<div>
+<h4 class="font-headline-md text-lg leading-tight">Together AI</h4>
+<p class="text-xs text-on-surface-variant font-label-mono">llama-3.3-70b-v1</p>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<p class="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
+<p class="font-metric-display text-metric-display text-on-surface-variant">$0.000687</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/30">
+<p class="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
+<p class="font-metric-display text-headline-md text-on-surface">$1,030.50</p>
+<div class="mt-2 h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-on-surface-variant w-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Savings Banner -->
+<div class="p-5 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success">
+<span class="material-symbols-outlined text-[20px]">savings</span>
+</div>
+<div>
+<p class="font-bold text-emerald-700 leading-none">Estimated Monthly Savings</p>
+<p class="text-sm text-emerald-600/80 mt-1">Calculated against standard hyperscaler pricing (AWS Bedrock, Vertex AI)</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-metric-display text-2xl text-success">$412.50</p>
+</div>
+</div>
+<!-- Source Info & Quick Action -->
+<div class="pt-4 grid grid-cols-1 md:grid-cols-2 items-center gap-gutter border-b border-outline-variant pb-8">
+<div>
+<p class="text-xs text-on-surface-variant italic mb-2">Sources: Provider API docs, last updated 12h ago. All prices normalized to 1k tokens (80/20 input/output split).</p>
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
+<span class="material-symbols-outlined text-xs">verified</span>
+                                PRICE VERIFIED
+                            </span>
+<span class="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
+<span class="material-symbols-outlined text-xs">history</span>
+                                UPDATED 10:45 AM UTC
+                            </span>
+</div>
+</div>
+<div class="flex justify-end">
+<button class="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-primary/20">
+                            Deploy with $10 Free Credits
+                            <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+</div>
+</div>
+<!-- SEO Content: Deep Dive Analysis -->
+<div class="py-12">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-8">Deep Dive Analysis</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="space-y-4">
+<h3 class="text-lg font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">analytics</span>
+                                Llama 3.3 70B Model Performance &amp; Benchmarks
+                            </h3>
+<div class="text-body-md text-on-surface-variant space-y-4 leading-relaxed">
+<p>
+                                    Llama 3.3 70B represents a significant leap in open-weights model efficiency. With its massive 128k context window, it can process entire technical documents or extensive codebases in a single prompt. 
+                                </p>
+<p>
+                                    In reasoning benchmarks, it competes directly with GPT-4o, making it an ideal candidate for complex agentic workflows, structured data extraction, and high-precision RAG (Retrieval Augmented Generation) systems where reasoning depth is paramount.
+                                </p>
+<div class="bg-surface-container-low p-4 rounded-lg border border-outline-variant/30">
+<p class="font-bold text-xs uppercase tracking-widest text-on-surface mb-2">Ideal Use Cases</p>
+<ul class="text-xs space-y-2 list-disc list-inside opacity-80">
+<li>Complex Logic &amp; Code Generation</li>
+<li>Multi-step Reasoning Agents</li>
+<li>Large-scale Document Summarization</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="text-lg font-bold text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">lan</span>
+                                Provider Network Comparison
+                            </h3>
+<div class="text-body-md text-on-surface-variant space-y-4 leading-relaxed">
+<p>
+                                    When choosing between providers like DeepInfra and Together AI, the trade-off typically lies between <strong>Latency-Optimization</strong> and <strong>Cost-Optimization</strong>.
+                                </p>
+<p>
+                                    Cost-optimized providers often leverage larger clusters of shared H100s to drive down the price per token. Latency-optimized providers might offer dedicated instances or specialized kernels that prioritize Time-To-First-Token (TTFT) for interactive chat applications.
+                                </p>
+<p>
+                                    For high-volume batch processing, the price delta shown in our Battleground ($412.50/mo savings) makes a compelling case for selecting the current pricing leader.
+                                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Trust & Reliability Section -->
+<div class="py-12 border-t border-outline-variant">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<div class="lg:col-span-2 bg-surface-container-low rounded-xl p-8 border border-outline-variant/50">
+<div class="flex items-center gap-3 mb-6">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">verified_user</span>
+</div>
+<h3 class="font-headline-md text-xl">Verified Provider Data</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="flex flex-col gap-2">
+<span class="material-symbols-outlined text-success">sync</span>
+<span class="font-bold text-sm">Real-time Pricing Sync</span>
+<p class="text-xs text-on-surface-variant">Our scrapers verify API pricing every hour against official provider rate sheets.</p>
+</div>
+<div class="flex flex-col gap-2">
+<span class="material-symbols-outlined text-success">fact_check</span>
+<span class="font-bold text-sm">Verified Benchmark Data</span>
+<p class="text-xs text-on-surface-variant">Performance metrics are sourced from independent LLM perf monitors like Artificial Analysis.</p>
+</div>
+<div class="flex flex-col gap-2">
+<span class="material-symbols-outlined text-success">api</span>
+<span class="font-bold text-sm">Direct API Integration</span>
+<p class="text-xs text-on-surface-variant">We use direct vendor endpoints for status checks to ensure 99.9% availability reporting.</p>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl p-6 border border-outline-variant shadow-sm flex flex-col">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-on-surface-variant text-lg">info</span>
+<h4 class="font-bold text-sm uppercase tracking-wider text-on-surface-variant">Data Methodology</h4>
+</div>
+<p class="text-body-md text-on-surface-variant mb-6 leading-relaxed">
+                                Costs are calculated using a blended 80/20 input-to-output token ratio. Our projections assume standard tiered pricing and do not include reserved instance discounts.
+                            </p>
+<div class="mt-auto pt-4 border-t border-outline-variant flex items-center justify-between">
+<span class="font-label-mono text-[10px] text-on-surface-variant">REF: TM-METH-2024</span>
+<span class="px-2 py-1 bg-surface-container rounded font-label-mono text-[10px] font-bold">UPDATED HOURLY</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-margin-desktop mt-auto bg-surface-container-low border-t border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter max-w-7xl mx-auto">
+<div class="col-span-1 md:col-span-1">
+<span class="font-headline-md text-headline-md text-on-surface mb-4 block">TokenMetrics</span>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80">
+                    © 2024 TokenMetrics. Built for high-frequency AI computation.
+                </p>
+</div>
+<div>
+<h5 class="font-label-mono text-primary font-bold mb-4 uppercase tracking-wider">Resources</h5>
+<ul class="space-y-2">
+<li><a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors" href="#">Documentation</a></li>
+<li><a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors" href="#">API Reference</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-mono text-primary font-bold mb-4 uppercase tracking-wider">Platform</h5>
+<ul class="space-y-2">
+<li><a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors" href="#">Status</a></li>
+<li><a class="font-label-mono text-label-mono text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-mono text-primary font-bold mb-4 uppercase tracking-wider">Connect</h5>
+<div class="flex gap-4">
+<a class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">terminal</span>
+</a>
+<a class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">hub</span>
+</a>
+</div>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interactions for sliders
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                const valueDisplay = e.target.parentElement.querySelector('.text-primary');
+                if (e.target.min == 128) { // Input tokens
+                    valueDisplay.textContent = `${parseInt(e.target.value).toLocaleString()} t`;
+                } else if (e.target.min == 64) { // Output tokens
+                    valueDisplay.textContent = `${parseInt(e.target.value).toLocaleString()} t`;
+                } else { // Volume
+                    const val = (e.target.value / 1000000).toFixed(1);
+                    valueDisplay.textContent = `${val}M req`;
+                }
+            });
+        });
+    </script>
+</body></html>

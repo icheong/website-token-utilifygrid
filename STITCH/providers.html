@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ModelForge AI | Model &amp; Provider Directory</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#370e00",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "surface": "#faf8ff",
+                        "surface-container-low": "#f3f3fd",
+                        "on-secondary-fixed-variant": "#004a76",
+                        "background": "#faf8ff",
+                        "success": "#146c2e",
+                        "primary-container-dark": "#1f3760",
+                        "inverse-surface": "#2e3038",
+                        "error": "#b3261e",
+                        "warning": "#f9ab00",
+                        "surface-variant": "#e1e2ec",
+                        "on-surface-variant": "#424654",
+                        "inverse-on-surface": "#f0f0fb",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#dae2ff",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#ced9ff",
+                        "surface-container": "#ededf8",
+                        "inverse-primary": "#b2c5ff",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed": "#cee5ff",
+                        "on-primary-fixed-variant": "#0040a1",
+                        "on-secondary": "#ffffff",
+                        "surface-bright": "#faf8ff",
+                        "on-primary": "#ffffff",
+                        "secondary": "#00639b",
+                        "on-secondary-container": "#004f7d",
+                        "on-primary-fixed": "#001847",
+                        "secondary-dark": "#7fcfff",
+                        "tertiary": "#802b00",
+                        "on-background": "#191b23",
+                        "primary-fixed-dim": "#b2c5ff",
+                        "outline": "#737785",
+                        "surface-container-high": "#e7e7f2",
+                        "on-surface": "#191b23",
+                        "secondary-container": "#7ec1ff",
+                        "surface-container-dark": "#282a2c",
+                        "on-secondary-fixed": "#001d33",
+                        "on-tertiary-container": "#ffcfbe",
+                        "outline-variant": "#c3c6d6",
+                        "on-tertiary": "#ffffff",
+                        "primary-container-light": "#d3e3fd",
+                        "surface-dim": "#d9d9e4",
+                        "primary": "#0041a2",
+                        "error-container": "#ffdad6",
+                        "surface-tint": "#0856cf",
+                        "surface-container-light": "#f0f4f9",
+                        "primary-dark": "#a8c7fa",
+                        "surface-container-highest": "#e1e2ec",
+                        "primary-container": "#0b57d0",
+                        "tertiary-fixed": "#ffdbce",
+                        "tertiary-container": "#a83b00",
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "secondary-fixed-dim": "#96cbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "12px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "2rem",
+                        "margin-mobile": "1rem",
+                        "gutter": "1rem",
+                        "component-gap": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Inter"],
+                        "label-mono": ["JetBrains Mono"],
+                        "body-md": ["Inter"],
+                        "metric-display": ["JetBrains Mono"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "label-mono": ["12px", {"lineHeight": "1.0", "fontWeight": "500"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "metric-display": ["32px", {"lineHeight": "1.1", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .flat-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,.04);
+            border: 1px solid #dcdfe5;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e1e2ec;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-surface min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="bg-surface-container-lowest flex justify-between items-center w-full px-margin-desktop h-16 docked full-width top-0 border-b border-outline-variant shadow-sm z-50 sticky">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<img alt="ModelForge AI Logo" class="h-8 w-8 object-contain" src="https://lh3.googleusercontent.com/aida/AP1WRLuznHNrHqQoyRvdDBu55rpCGzfPmVyGM3ItLzRgyUwQ6wePWek5iYlb9ngrT3-zCDR28N8GUtyqGEyAlQFBpc2qwFJfNIrp2bJF8z2zF8cw4dC0WKCp2sn_N-d2mg-HDf6HC79gWauNNPlqcjzT9R00Hzfwf_jSo0yqKffNHh-JoMfdRr_6gMfkNernE3EdXJETD9Vcf3s64tq3SgknCr1PfQbAJ-8KpESDDMoDTZ5JY7xs4vqxcmjq6J75"/>
+<span class="font-headline-md text-headline-md font-bold text-primary">ModelForge AI</span>
+</div>
+<nav class="hidden md:flex items-center gap-6 ml-8">
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#">Directory</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#">Benchmarks</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#">Ecosystem</a>
+<a class="text-on-surface-variant font-body-md text-body-md hover:text-primary transition-colors duration-200" href="#">API</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-variant/50">settings</button>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-surface-variant/50">notifications</button>
+<button class="bg-primary text-on-primary px-4 py-2 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all">Get Started</button>
+</div>
+</header>
+<main class="flex flex-col md:flex-row gap-gutter px-margin-desktop py-8 max-w-[1440px] mx-auto">
+<!-- Left Column: Technical Filters (25%) -->
+<aside class="w-full md:w-64 shrink-0 flex flex-col gap-component-gap">
+<div class="flex flex-col gap-1 mb-2">
+<h2 class="font-headline-md text-[18px] text-primary">Technical Filters</h2>
+<p class="font-label-mono text-label-mono text-on-surface-variant opacity-70 uppercase tracking-wider">Refine search criteria</p>
+</div>
+<div class="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex flex-col gap-6">
+<!-- Context Window -->
+<section>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[18px] text-secondary">data_object</span>
+<h3 class="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Context Window</h3>
+</div>
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">4,096 tokens</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">32,768 tokens</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">128k+ tokens</span>
+</label>
+</div>
+</section>
+<!-- Model Class -->
+<section>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[18px] text-secondary">layers</span>
+<h3 class="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Model Class</h3>
+</div>
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Compact (1B - 8B)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Mid-size (70B - 141B)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Expert (MoE / 400B+)</span>
+</label>
+</div>
+</section>
+<!-- Host Network -->
+<section>
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-[18px] text-secondary">hub</span>
+<h3 class="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Host Network</h3>
+</div>
+<div class="flex flex-col gap-2">
+<label class="flex items-center gap-3 cursor-pointer group">
+<input checked="" class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Aggregators (Groq, Together)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Hyperscalers (AWS, GCP)</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-body-md text-body-md text-on-surface-variant group-hover:text-primary transition-colors">Decentralized Clusters</span>
+</label>
+</div>
+</section>
+<button class="w-full py-2 bg-surface-container-highest hover:bg-surface-variant text-on-surface-variant font-label-mono text-label-mono rounded-lg transition-colors border border-outline-variant">
+                    Reset All Filters
+                </button>
+</div>
+<!-- Stats Mini Card -->
+<div class="p-4 flat-card bg-primary-container-light/30">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-mono text-label-mono text-primary font-bold">Network Load</span>
+<span class="font-label-mono text-label-mono text-success">Optimal</span>
+</div>
+<div class="w-full bg-surface-container h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[42%]"></div>
+</div>
+</div>
+</aside>
+<!-- Main Column: Model Directory (75%) -->
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-end mb-6">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Model Registry</h1>
+<p class="text-on-surface-variant font-body-md mt-1">324 active open-weight variants indexed across 14 networks.</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-mono text-label-mono text-on-surface-variant">Sort by:</span>
+<select class="bg-surface border-outline-variant rounded-lg font-label-mono text-label-mono py-1 pr-8 text-primary">
+<option>Performance (MMLU)</option>
+<option>Throughput (t/s)</option>
+<option>Pricing (Low to High)</option>
+</select>
+</div>
+</div>
+<!-- Scannable Table Layout -->
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full border-collapse">
+<thead>
+<tr class="text-left border-b border-outline-variant">
+<th class="pb-4 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider pl-2">Model Identity</th>
+<th class="pb-4 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Context</th>
+<th class="pb-4 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider">Providers</th>
+<th class="pb-4 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-right pr-2">Cost / 1M Tokens</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container">
+<!-- Model Row 1 -->
+<tr class="group hover:bg-surface-container-lowest transition-colors">
+<td class="py-5 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary-container-light flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-weight="fill">neurology</span>
+</div>
+<div>
+<div class="font-headline-md text-[15px] font-bold text-on-surface">Llama-3-70B-Instruct</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">by Meta AI</div>
+</div>
+</div>
+</td>
+<td class="py-5">
+<span class="font-metric-display text-[16px] text-on-surface">128,000 t</span>
+</td>
+<td class="py-5">
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Groq</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Together</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Perplexity</span>
+</div>
+</td>
+<td class="py-5 text-right pr-2">
+<span class="font-metric-display text-[16px] text-primary">$0.60 - $0.90</span>
+</td>
+</tr>
+<!-- Model Row 2 -->
+<tr class="group hover:bg-surface-container-lowest transition-colors">
+<td class="py-5 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-secondary-container/20 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-weight="fill">hub</span>
+</div>
+<div>
+<div class="font-headline-md text-[15px] font-bold text-on-surface">Mixtral-8x22B-v0.1</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">by Mistral AI</div>
+</div>
+</div>
+</td>
+<td class="py-5">
+<span class="font-metric-display text-[16px] text-on-surface">65,536 t</span>
+</td>
+<td class="py-5">
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Fireworks</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">OpenRouter</span>
+</div>
+</td>
+<td class="py-5 text-right pr-2">
+<span class="font-metric-display text-[16px] text-primary">$1.10 - $2.00</span>
+</td>
+</tr>
+<!-- Model Row 3 -->
+<tr class="group hover:bg-surface-container-lowest transition-colors">
+<td class="py-5 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-weight="fill">bolt</span>
+</div>
+<div>
+<div class="font-headline-md text-[15px] font-bold text-on-surface">Llama-3-8B-Instruct</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">by Meta AI</div>
+</div>
+</div>
+</td>
+<td class="py-5">
+<span class="font-metric-display text-[16px] text-on-surface">8,192 t</span>
+</td>
+<td class="py-5">
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Groq</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">DeepInfra</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">OctoAI</span>
+</div>
+</td>
+<td class="py-5 text-right pr-2">
+<span class="font-metric-display text-[16px] text-primary">$0.05 - $0.15</span>
+</td>
+</tr>
+<!-- Model Row 4 -->
+<tr class="group hover:bg-surface-container-lowest transition-colors">
+<td class="py-5 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-weight="fill">token</span>
+</div>
+<div>
+<div class="font-headline-md text-[15px] font-bold text-on-surface">Qwen2-72B-Instruct</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">by Alibaba</div>
+</div>
+</div>
+</td>
+<td class="py-5">
+<span class="font-metric-display text-[16px] text-on-surface">32,768 t</span>
+</td>
+<td class="py-5">
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Together</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Lepton</span>
+</div>
+</td>
+<td class="py-5 text-right pr-2">
+<span class="font-metric-display text-[16px] text-primary">$0.40 - $0.70</span>
+</td>
+</tr>
+<!-- Model Row 5 -->
+<tr class="group hover:bg-surface-container-lowest transition-colors">
+<td class="py-5 pl-2">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center text-success">
+<span class="material-symbols-outlined" data-weight="fill">shield</span>
+</div>
+<div>
+<div class="font-headline-md text-[15px] font-bold text-on-surface">Gemma-7B-it</div>
+<div class="font-body-md text-[12px] text-on-surface-variant">by Google</div>
+</div>
+</div>
+</td>
+<td class="py-5">
+<span class="font-metric-display text-[16px] text-on-surface">8,192 t</span>
+</td>
+<td class="py-5">
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Together</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30">Groq</span>
+</div>
+</td>
+<td class="py-5 text-right pr-2">
+<span class="font-metric-display text-[16px] text-primary">$0.10 - $0.20</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination/Footer Actions -->
+<div class="mt-8 flex justify-between items-center bg-surface-container-low p-4 rounded-xl border border-outline-variant">
+<div class="flex gap-2">
+<button class="px-3 py-1.5 flat-card text-on-surface-variant font-label-mono text-label-mono hover:bg-surface-variant transition-colors">Previous</button>
+<button class="px-3 py-1.5 flat-card bg-primary text-on-primary font-label-mono text-label-mono shadow-sm">1</button>
+<button class="px-3 py-1.5 flat-card text-on-surface-variant font-label-mono text-label-mono hover:bg-surface-variant transition-colors">2</button>
+<button class="px-3 py-1.5 flat-card text-on-surface-variant font-label-mono text-label-mono hover:bg-surface-variant transition-colors">3</button>
+<button class="px-3 py-1.5 flat-card text-on-surface-variant font-label-mono text-label-mono hover:bg-surface-variant transition-colors">Next</button>
+</div>
+<div class="font-label-mono text-label-mono text-on-surface-variant">
+                    Showing 5 of 324 models
+                </div>
+</div>
+</div>
+</main>
+<footer class="flex justify-between items-center px-margin-desktop py-4 w-full full-width bottom-0 border-t border-outline-variant bg-surface mt-12">
+<div class="flex flex-col gap-1">
+<span class="font-headline-md text-[18px] text-primary font-bold">ModelForge AI</span>
+<p class="font-label-mono text-label-mono text-on-surface-variant opacity-80">© 2024 ModelForge AI. Sponsor: ComputeGrid Labs</p>
+</div>
+<div class="flex gap-6">
+<a class="font-label-mono text-label-mono text-on-surface-variant opacity-80 hover:opacity-100 transition-opacity duration-200" href="#">Privacy</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant opacity-80 hover:opacity-100 transition-opacity duration-200" href="#">Terms</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant opacity-80 hover:opacity-100 transition-opacity duration-200" href="#">Docs</a>
+<a class="font-label-mono text-label-mono text-on-surface-variant opacity-80 hover:opacity-100 transition-opacity duration-200" href="#">Status</a>
+</div>
+</footer>
+<!-- Micro-interaction for table rows -->
+<script>
+        document.querySelectorAll('tbody tr').forEach(row => {
+            row.addEventListener('click', () => {
+                // Visual feedback
+                row.classList.add('bg-primary-container-light/40');
+                setTimeout(() => {
+                    row.classList.remove('bg-primary-container-light/40');
+                }, 150);
+            });
+        });
+    </script>
+</body></html>

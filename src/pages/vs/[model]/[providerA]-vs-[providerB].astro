@@ -1,0 +1,25 @@
+---
+// src/pages/vs/[model]/[providerA]-vs-[providerB].astro
+import MainLayout from '../../../layouts/MainLayout.astro';
+import ComparisonPage from '../../../components/ComparisonPage.jsx';
+
+export async function getStaticPaths() {
+  return [
+    { params: { model: 'llama-3-3-70b', providerA: 'deepinfra', providerB: 'together-ai' } },
+  ];
+}
+
+const { model, providerA, providerB } = Astro.params;
+---
+
+<MainLayout 
+  title={`${providerA?.replace(/-/g, ' ')} vs ${providerB?.replace(/-/g, ' ')} - ${model?.replace(/-/g, ' ')} Pricing`} 
+  description={`Compare ${model?.replace(/-/g, ' ')} pricing interactively. Cost calculator with real-time savings estimates from Supabase.`}
+>
+  <ComparisonPage 
+    client:load 
+    modelSlug={model} 
+    providerASlug={providerA} 
+    providerBSlug={providerB} 
+  />
+</MainLayout>

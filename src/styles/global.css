@@ -1,0 +1,165 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Stitch Design System Color Tokens */
+  --color-background: #faf8ff;
+  --color-error: #b3261e;
+  --color-error-container: #ffdad6;
+  --color-inverse-on-surface: #f0f0fb;
+  --color-inverse-primary: #b2c5ff;
+  --color-inverse-surface: #2e3038;
+  --color-on-background: #191b23;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #ced9ff;
+  --color-on-primary-fixed: #001847;
+  --color-on-primary-fixed-variant: #0040a1;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #004f7d;
+  --color-on-secondary-fixed: #001d33;
+  --color-on-secondary-fixed-variant: #004a76;
+  --color-on-surface: #191b23;
+  --color-on-surface-variant: #424654;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #ffcfbe;
+  --color-on-tertiary-fixed: #370e00;
+  --color-on-tertiary-fixed-variant: #7f2b00;
+  --color-outline: #737785;
+  --color-outline-variant: #c3c6d6;
+  --color-primary: #0041a2;
+  --color-primary-container-dark: #1f3760;
+  --color-primary-container-light: #d3e3fd;
+  --color-primary-dark: #a8c7fa;
+  --color-primary-container: #0b57d0;
+  --color-primary-fixed: #dae2ff;
+  --color-primary-fixed-dim: #b2c5ff;
+  --color-secondary: #00639b;
+  --color-secondary-dark: #7fcfff;
+  --color-secondary-container: #7ec1ff;
+  --color-secondary-fixed: #cee5ff;
+  --color-secondary-fixed-dim: #96cbff;
+  --color-success: #146c2e;
+  --color-surface: #faf8ff;
+  --color-surface-container-dark: #282a2c;
+  --color-surface-container-light: #f0f4f9;
+  --color-surface-bright: #faf8ff;
+  --color-surface-container: #ededf8;
+  --color-surface-container-high: #e7e7f2;
+  --color-surface-container-highest: #e1e2ec;
+  --color-surface-container-low: #f3f3fd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-dim: #d9d9e4;
+  --color-surface-tint: #0856cf;
+  --color-surface-variant: #e1e2ec;
+  --color-tertiary: #802b00;
+  --color-tertiary-container: #a83b00;
+  --color-tertiary-fixed: #ffdbce;
+  --color-tertiary-fixed-dim: #ffb599;
+  --color-warning: #f9ab00;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  .dark body {
+    @apply bg-surface-container-dark text-slate-100;
+  }
+  
+  /* Design System Outline Colors */
+  :root {
+    --border-light: #dcdfe5;
+    --border-dark: #2d2f38;
+  }
+  
+  .dark {
+    --border-light: #2d2f38;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white rounded-xl border border-outline-variant shadow-card;
+  }
+  
+  .dark .card {
+    @apply bg-surface-container-dark border-slate-800;
+  }
+  
+  .metric-display {
+    @apply font-mono text-metric-display font-bold;
+  }
+  
+  .label-mono {
+    @apply font-mono text-label-mono font-medium uppercase tracking-wider;
+  }
+}
+
+@layer utilities {
+  .transition-bezier {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer components {
+  .command-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1.2em;
+    background: currentColor;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e1e2ec;
+  border-radius: 10px;
+}
+
+.flat-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  border: 1px solid #dcdfe5;
+}
+
+.flat-layered-card {
+  background-color: white;
+  border: 1px solid #dcdfe5;
+  box-shadow: 0 4px 12px rgba(0,0,0,.04);
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider-thumb::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #0041a2;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: scale 200ms ease;
+}
+
+.slider-thumb:active::-webkit-slider-thumb {
+  scale: 1.2;
+}
