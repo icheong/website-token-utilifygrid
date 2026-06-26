@@ -32,7 +32,7 @@ export default function TrendingMatchups() {
               providerB: providers[j].slug,
               providerBName: providers[j].name,
               label: `${modelName}: ${providers[i].name} vs ${providers[j].name}`,
-              href: `/vs/${model}/${providers[i].slug}-vs-${providers[j].slug}`,
+              href: `/vs/${model}/${[providers[i].slug, providers[j].slug].sort().join('-vs-')}`,
             });
           }
         }

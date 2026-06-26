@@ -1,5 +1,6 @@
 // src/components/InteractiveCalculator.jsx
 import React, { useState, useEffect } from 'react';
+import { useCurrencyStore } from '../stores/useCurrencyStore';
 
 function ensureHttps(url) {
   if (!url) return '#';
@@ -37,6 +38,8 @@ function formatTimeUTC(dateString) {
 }
 
 export default function InteractiveCalculator({ model, providerA, providerB, pricingA, pricingB }) {
+  const { convert, format } = useCurrencyStore();
+  
   // 1. Initial State Definitions (matching Stitch compare.html slider ranges)
   const [inputVal, setInputVal] = useState(1024);
   const [outputVal, setOutputVal] = useState(512);
@@ -75,21 +78,21 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
   }, [inputVal, outputVal, volumeVal]);
 
   return (
-    <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-12 flex flex-col md:flex-row gap-4">
+    <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8 flex flex-col md:flex-row gap-4">
       
-      {/* LEFT COLUMN: Control Panel (30%) - Matching Stitch compare.html design */}
-      <aside className="w-full md:w-[30%]">
-        <div className="p-6 border border-outline-variant rounded-xl bg-surface-container-lowest sticky top-24">
-          <h3 className="font-headline-md text-lg mb-6 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">tune</span>
-            Usage Parameters
-          </h3>
-          <div className="space-y-8">
+      {/* LEFT COLUMN: Control Panel (30%) - Matching providers page style */}
+      <aside className="w-full md:w-72 shrink-0">
+        <div className="bg-surface-container-low border border-outline-variant rounded-xl p-4 flex flex-col gap-5 max-h-[calc(100vh-180px)] overflow-y-auto custom-scrollbar sticky top-24">
+          <div className="flex flex-col gap-1 mb-1">
+            <h2 className="font-headline-md text-[18px] text-primary">Usage Parameters</h2>
+            <p className="font-label-mono text-label-mono text-on-surface-variant opacity-70 uppercase tracking-wider text-[10px]">Adjust calculation</p>
+          </div>
+          <div className="space-y-6">
             {/* Slider 1: Input Tokens */}
             <div>
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-body-md font-medium text-on-surface-variant">Input Tokens/Req</label>
-                <span className="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-medium text-on-surface-variant">Input Tokens/Req</label>
+                <span className="font-label-mono text-label-mono text-xs text-primary px-2 py-1 bg-primary-container-light rounded">
                   {inputVal.toLocaleString()} t
                 </span>
               </div>
@@ -103,9 +106,9 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
             
             {/* Slider 2: Output Tokens */}
             <div>
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-body-md font-medium text-on-surface-variant">Output Tokens/Req</label>
-                <span className="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-medium text-on-surface-variant">Output Tokens/Req</label>
+                <span className="font-label-mono text-label-mono text-xs text-primary px-2 py-1 bg-primary-container-light rounded">
                   {outputVal.toLocaleString()} t
                 </span>
               </div>
@@ -119,9 +122,9 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
             
             {/* Slider 3: Monthly Volume */}
             <div>
-              <div className="flex justify-between items-center mb-3">
-                <label className="text-body-md font-medium text-on-surface-variant">Monthly API Volume</label>
-                <span className="font-label-mono text-label-mono text-primary px-2 py-1 bg-primary-container-light rounded">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-xs font-medium text-on-surface-variant">Monthly API Volume</label>
+                <span className="font-label-mono text-label-mono text-xs text-primary px-2 py-1 bg-primary-container-light rounded">
                   {(volumeVal / 1000000).toFixed(1)}M req
                 </span>
               </div>
@@ -134,19 +137,19 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
             </div>
           </div>
           
-          <div className="mt-10 pt-6 border-t border-outline-variant">
+          <div className="pt-4 border-t border-outline-variant">
             <div className="flex items-center justify-between text-on-surface-variant">
-              <span className="text-sm">Compute Region</span>
-              <span className="text-sm font-bold">Global (Any)</span>
+              <span className="text-xs">Compute Region</span>
+              <span className="text-xs font-bold">Global (Any)</span>
             </div>
           </div>
         </div>
       </aside>
 
-      {/* RIGHT COLUMN: Comparison Cards (70%) - Matching Stitch compare.html design */}
-      <section className="w-full md:w-[70%] space-y-4">
-        <div className="mb-6">
-          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Provider Price Battleground</h1>
+      {/* RIGHT COLUMN: Comparison Cards (70%) - Matching providers page style */}
+      <section className="flex-1 min-w-0 space-y-4">
+        <div className="mb-4">
+          <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">{providerA?.name} vs {providerB?.name} Comparison</h1>
           <div className="flex items-center gap-2 mt-1">
             <span className="px-2 py-1 bg-surface-container-highest rounded text-xs font-bold uppercase tracking-wider text-on-surface-variant">
               Active Model
@@ -184,7 +187,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               <div>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
                 <p className="font-metric-display text-metric-display text-primary">
-                  ${costs.singleA.toFixed(6)}
+                  {format(convert(costs.singleA))}
                 </p>
               </div>
               <div className={`p-4 rounded-lg border ${
@@ -194,7 +197,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               }`}>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
                 <p className="font-metric-display text-headline-md text-on-surface">
-                  ${costs.monthlyA.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                  {format(convert(costs.monthlyA))}
                 </p>
                 <div className={`mt-2 h-1 w-full rounded-full overflow-hidden ${
                   costs.winner === 'A' ? 'bg-emerald-100' : 'bg-surface-container-high'
@@ -232,7 +235,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               <div>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
                 <p className="font-metric-display text-metric-display text-on-surface-variant">
-                  ${costs.singleB.toFixed(6)}
+                  {format(convert(costs.singleB))}
                 </p>
               </div>
               <div className={`p-4 rounded-lg border ${
@@ -242,7 +245,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               }`}>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
                 <p className="font-metric-display text-headline-md text-on-surface">
-                  ${costs.monthlyB.toLocaleString(undefined, {maximumFractionDigits: 2})}
+                  {format(convert(costs.monthlyB))}
                 </p>
                 <div className={`mt-2 h-1 w-full rounded-full overflow-hidden ${
                   costs.winner === 'B' ? 'bg-emerald-100' : 'bg-surface-container-high'
@@ -270,7 +273,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
           </div>
           <div className="text-right">
             <p className="font-metric-display text-2xl text-success">
-              ${costs.difference.toLocaleString(undefined, {maximumFractionDigits: 2})}
+              {format(convert(costs.difference))}
             </p>
           </div>
         </div>

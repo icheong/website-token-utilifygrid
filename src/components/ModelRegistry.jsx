@@ -1,50 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { fetchPricing } from '../utils/supabase';
+import { fetchPricing, fetchProviders } from '../utils/supabase';
 
 export default function ModelRegistry() {
   const [models, setModels] = useState([]);
+  const [providers, setProviders] = useState([]);
+  const [selectedProviders, setSelectedProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('name');
 
   useEffect(() => {
-    fetchPricing().then(pricing => {
-      const modelMap = {};
-      pricing.forEach(item => {
-        const m = item.models;
-        if (!m) return;
-        if (!modelMap[m.slug]) {
-          modelMap[m.slug] = {
-            ...m,
-            providers: [],
-            minPrice: Infinity,
-            maxPrice: 0,
-          };
-        }
-        if (item.providers) {
-          modelMap[m.slug].providers.push({
-            slug: item.providers.slug,
-            name: item.providers.name,
-          });
-        }
-        const avgPrice = ((item.input_price_per_m || 0) + (item.output_price_per_m || 0)) / 2;
-        if (avgPrice < modelMap[m.slug].minPrice) modelMap[m.slug].minPrice = avgPrice;
-        if (avgPrice > modelMap[m.slug].maxPrice) modelMap[m.slug].maxPrice = avgPrice;
-      });
+    Promise.all([fetchPricing(), fetchProviders()])
+      .then(([pricing, providersData]) => {
+        setProviders(providersData);
+        
+        const modelMap = {};
+        pricing.forEach(item => {
+          const m = item.models;
+          if (!m) return;
+          if (!modelMap[m.slug]) {
+            modelMap[m.slug] = {
+              ...m,
+              providers: [],
+              minPrice: Infinity,
+              maxPrice: 0,
+            };
+          }
+          if (item.providers) {
+            modelMap[m.slug].providers.push({
+              slug: item.providers.slug,
+              name: item.providers.name,
+              id: item.providers.id,
+            });
+          }
+          const avgPrice = ((item.input_price_per_m || 0) + (item.output_price_per_m || 0)) / 2;
+          if (avgPrice < modelMap[m.slug].minPrice) modelMap[m.slug].minPrice = avgPrice;
+          if (avgPrice > modelMap[m.slug].maxPrice) modelMap[m.slug].maxPrice = avgPrice;
+        });
 
-      const list = Object.values(modelMap).map(m => ({
-        ...m,
-        minPrice: m.minPrice === Infinity ? 0 : m.minPrice,
-      }));
-      setModels(list);
-      setLoading(false);
-    }).catch(err => {
-      setError(err.message);
-      setLoading(false);
-    });
+        const list = Object.values(modelMap).map(m => ({
+          ...m,
+          minPrice: m.minPrice === Infinity ? 0 : m.minPrice,
+        }));
+        setModels(list);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
-  const sorted = [...models].sort((a, b) => {
+  const toggleProvider = (providerId) => {
+    setSelectedProviders(prev => 
+      prev.includes(providerId)
+        ? prev.filter(id => id !== providerId)
+        : [...prev, providerId]
+    );
+  };
+
+  const filteredModels = selectedProviders.length === 0
+    ? models
+    : models.filter(model => 
+        model.providers.some(p => selectedProviders.includes(p.id))
+      );
+
+  const sorted = [...filteredModels].sort((a, b) => {
     if (sortBy === 'name') return a.name.localeCompare(b.name);
     if (sortBy === 'context') return b.context_window - a.context_window;
     if (sortBy === 'price') return a.minPrice - b.minPrice;
@@ -66,7 +87,7 @@ export default function ModelRegistry() {
       <div className="flex items-center justify-center py-20">
         <div className="flex items-center gap-3 text-on-surface-variant">
           <span className="material-symbols-outlined animate-spin">progress_activity</span>
-          <span className="font-body-md text-body-md">Loading models from Supabase...</span>
+          <span className="font-body-md text-body-md">Loading models...</span>
         </div>
       </div>
     );
@@ -88,7 +109,7 @@ export default function ModelRegistry() {
       <div class="flex justify-between items-end mb-6">
         <div>
           <h1 class="font-headline-lg text-headline-lg text-on-surface">Model Registry</h1>
-          <p class="text-on-surface-variant font-body-md mt-1">{models.length} active model variants indexed.</p>
+          <p class="text-on-surface-variant font-body-md mt-1">{filteredModels.length} of {models.length} models shown.</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="font-label-mono text-label-mono text-on-surface-variant">Sort by:</span>
@@ -101,6 +122,37 @@ export default function ModelRegistry() {
             <option value="context">Context Window</option>
             <option value="price">Pricing (Low to High)</option>
           </select>
+        </div>
+      </div>
+
+      {/* Provider Filter Pills */}
+      <div class="mb-6">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-[18px] text-secondary">hub</span>
+          <span class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-xs">Filter by Provider</span>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          {providers.map(provider => (
+            <button
+              key={provider.id}
+              onClick={() => toggleProvider(provider.id)}
+              class={`px-3 py-1.5 rounded-full font-label-mono text-xs uppercase border transition-colors ${
+                selectedProviders.includes(provider.id)
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-surface-container-low text-on-surface-variant border-outline-variant hover:border-primary hover:text-primary'
+              }`}
+            >
+              {provider.name}
+            </button>
+          ))}
+          {selectedProviders.length > 0 && (
+            <button
+              onClick={() => setSelectedProviders([])}
+              class="px-3 py-1.5 rounded-full font-label-mono text-xs uppercase border border-outline-variant text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+            >
+              Clear All
+            </button>
+          )}
         </div>
       </div>
 
@@ -136,7 +188,7 @@ export default function ModelRegistry() {
                     {model.providers.map(p => (
                       <a 
                         key={p.slug}
-                        href={`/vs/${model.slug}/${p.slug}-${model.providers[0]?.slug === p.slug && model.providers[1] ? model.providers[1].slug : model.providers[0]?.slug || 'unknown'}`}
+                        href={`/vs/${model.slug}/${[p.slug, model.providers[0]?.slug === p.slug && model.providers[1] ? model.providers[1].slug : model.providers[0]?.slug || 'unknown'].sort().join('-vs-')}`}
                         class="px-2 py-0.5 rounded-full bg-secondary-container/20 text-on-secondary-container font-label-mono text-[10px] uppercase border border-secondary-container/30 hover:bg-secondary-container/40 transition-colors"
                       >
                         {p.name}

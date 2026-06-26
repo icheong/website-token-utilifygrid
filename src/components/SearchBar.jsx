@@ -74,7 +74,8 @@ export default function SearchBar() {
   }, []);
 
   function navigateTo(model, providerA, providerB) {
-    window.location.href = `/vs/${model}/${providerA}-vs-${providerB}`;
+    const sorted = [providerA, providerB].sort();
+    window.location.href = `/vs/${model}/${sorted[0]}-vs-${sorted[1]}`;
   }
 
   function handleSubmit(e) {

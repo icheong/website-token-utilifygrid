@@ -38,7 +38,7 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
       <div className="flex items-center justify-center py-32">
         <div className="flex items-center gap-3 text-on-surface-variant">
           <span className="material-symbols-outlined animate-spin text-4xl">progress_activity</span>
-          <span className="font-body-md text-body-md">Loading comparison from Supabase...</span>
+          <span className="font-body-md text-body-md">Loading comparison...</span>
         </div>
       </div>
     );
@@ -77,11 +77,57 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
         pricingB={pricingB}
       />
 
-      <section className="max-w-7xl w-full mx-auto p-4 md:px-8 pb-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-start-5 lg:col-span-8 bg-white dark:bg-surface-container-dark rounded-xl border border-outline-variant dark:border-outline-dark p-6 md:p-8 space-y-6 shadow-card">
+      <section className="max-w-7xl w-full mx-auto px-4 md:px-8 pb-12">
+        <div className="ml-0 lg:ml-[calc(18rem+1rem)] bg-white dark:bg-surface-container-dark rounded-xl border border-outline-variant dark:border-outline-dark p-6 md:p-8 space-y-6 shadow-card">
           <h2 className="text-xl font-bold tracking-tight text-on-surface font-headline-md">
-            In-Depth Architecture Review: {providerA.name} vs {providerB.name}
+            {providerA.name} vs {providerB.name} Comparison
           </h2>
+
+          {/* Feature Comparison Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-outline-variant">
+                  <th className="text-left py-3 px-4 font-label-mono text-xs uppercase tracking-wider text-on-surface-variant">Feature</th>
+                  <th className="text-left py-3 px-4 font-headline-md text-sm text-primary font-semibold">{providerA.name}</th>
+                  <th className="text-left py-3 px-4 font-headline-md text-sm text-primary font-semibold">{providerB.name}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant">
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Input Price (per 1M tokens)</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">${pricingA?.input_price_per_m}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">${pricingB?.input_price_per_m}</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Output Price (per 1M tokens)</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">${pricingA?.output_price_per_m}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">${pricingB?.output_price_per_m}</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Throughput</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{pricingA?.latency_tps} TPS</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{pricingB?.latency_tps} TPS</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Prompt Caching</td>
+                  <td className="py-3 px-4 text-on-surface">{pricingA?.prompt_caching ? '✓ Supported' : '✗ Not Supported'}</td>
+                  <td className="py-3 px-4 text-on-surface">{pricingB?.prompt_caching ? '✓ Supported' : '✗ Not Supported'}</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Daily Limit</td>
+                  <td className="py-3 px-4 text-on-surface">{pricingA?.daily_limit || 'Unlimited'}</td>
+                  <td className="py-3 px-4 text-on-surface">{pricingB?.daily_limit || 'Unlimited'}</td>
+                </tr>
+                <tr>
+                  <td className="py-3 px-4 text-on-surface-variant font-medium">Context Window</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{model?.context_window?.toLocaleString()} tokens</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{model?.context_window?.toLocaleString()} tokens</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <div className="text-sm leading-relaxed text-on-surface-variant space-y-4">
             <p dangerouslySetInnerHTML={{ __html: seoContent?.introduction }} />
 

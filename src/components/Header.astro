@@ -1,6 +1,7 @@
 ---
 // src/components/Header.astro
 import Logo from './Logo.astro';
+import CurrencySelector from './CurrencySelector.jsx';
 
 interface Props {
   title?: string;
@@ -21,11 +22,12 @@ const { title = "Tokens@UG", activePage = "" } = Astro.props;
       </a>
       <div class="hidden md:flex gap-6 items-center">
         <a class={`font-body-md text-body-md ${activePage === 'models' ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'} transition-colors duration-200`} href="/providers">
-          Models
+          Providers + Models
         </a>
       </div>
     </div>
     <div class="flex items-center gap-4">
+      <CurrencySelector client:load />
       <button class="md:hidden text-on-surface-variant hover:text-primary transition-colors" aria-label="Menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>

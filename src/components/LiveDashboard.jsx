@@ -1,10 +1,12 @@
 // src/components/LiveDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { fetchPricing } from '../utils/supabase';
+import { useCurrencyStore } from '../stores/useCurrencyStore';
 
 export default function LiveDashboard() {
   const [pricing, setPricing] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { convert, format } = useCurrencyStore();
 
   useEffect(() => {
     fetchPricing()
@@ -58,7 +60,7 @@ export default function LiveDashboard() {
             <span className="text-xs text-outline">{item.provider}</span>
           </div>
           <span className="font-metric-display text-metric-display text-primary">
-            ${item.input_price_per_m.toFixed(4)}
+            {format(convert(item.input_price_per_m))}
           </span>
         </div>
       ))}
