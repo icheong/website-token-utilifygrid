@@ -3,6 +3,41 @@ import React, { useState, useEffect } from 'react';
 import { fetchPricing, fetchProviders } from '../utils/supabase';
 import { useCurrencyStore } from '../stores/useCurrencyStore';
 
+function CollapsibleSection({ title, icon, activeCount = 0, activeLabels = [], defaultOpen = false, children }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <section className="border-b border-outline-variant/30 last:border-b-0">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center gap-2 py-2 -my-0.5 cursor-pointer select-none group"
+      >
+        <span className="material-symbols-outlined text-[18px] text-secondary">{icon}</span>
+        <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight text-xs flex-1 text-left">{title}</h3>
+        {activeCount > 0 && !open && (
+          <span className="bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shrink-0">{activeCount}</span>
+        )}
+        <span className={`material-symbols-outlined text-[16px] text-on-surface-variant transition-transform duration-200 ${open ? 'rotate-180' : ''}`}>expand_more</span>
+      </button>
+      {!open && activeLabels.length > 0 && (
+        <div className="flex flex-wrap gap-1 pb-2 pl-7">
+          {activeLabels.slice(0, 3).map((label, i) => (
+            <span key={i} className="bg-primary-container-light/30 text-primary text-[10px] font-medium px-1.5 py-0.5 rounded-full">{label}</span>
+          ))}
+          {activeLabels.length > 3 && (
+            <span className="text-on-surface-variant text-[10px]">+{activeLabels.length - 3} more</span>
+          )}
+        </div>
+      )}
+      {open && (
+        <div className="pb-3">
+          {children}
+        </div>
+      )}
+    </section>
+  );
+}
+
 export default function ProvidersPage() {
   const { convert, format } = useCurrencyStore();
   const [models, setModels] = useState([]);
@@ -346,11 +381,7 @@ export default function ProvidersPage() {
           </div>
           
           {/* Context Window Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">data_object</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Context Window</h3>
-            </div>
+          <CollapsibleSection title="Context Window" icon="data_object" activeCount={contextFilters.length} activeLabels={contextFilters.map(f => ({ '8k': '≤8K', '32k': '8K-32K', '128k': '32K-128K', '128k+': '128K+' }[f] || f))} defaultOpen={false}>
             <div className="flex flex-col gap-2">
               {[
                 { value: '8k', label: '≤8K tokens' },
@@ -369,14 +400,10 @@ export default function ProvidersPage() {
                 </label>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Model Class Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">layers</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Model Class</h3>
-            </div>
+          <CollapsibleSection title="Model Class" icon="layers" activeCount={modelClassFilters.length} activeLabels={modelClassFilters.map(f => ({ compact: 'Compact', midsize: 'Mid-size', expert: 'Expert' }[f] || f))} defaultOpen={false}>
             <div className="flex flex-col gap-2">
               {[
                 { value: 'compact', label: 'Compact (1B - 8B)' },
@@ -394,15 +421,11 @@ export default function ProvidersPage() {
                 </label>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Category Filter */}
           {categories.length > 0 && (
-            <section>
-              <div className="flex items-center gap-2 mb-3">
-                <span className="material-symbols-outlined text-[18px] text-secondary">category</span>
-                <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Category</h3>
-              </div>
+            <CollapsibleSection title="Category" icon="category" activeCount={categoryFilters.length} activeLabels={categoryFilters} defaultOpen={false}>
               <div className="flex flex-col gap-2">
                 {categories.map(cat => (
                   <label key={cat} className="flex items-center gap-3 cursor-pointer group">
@@ -416,15 +439,11 @@ export default function ProvidersPage() {
                   </label>
                 ))}
               </div>
-            </section>
+            </CollapsibleSection>
           )}
 
           {/* Pricing Range Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">paid</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Pricing Range</h3>
-            </div>
+          <CollapsibleSection title="Pricing Range" icon="paid" activeCount={(pricingRange.min || pricingRange.max) ? 1 : 0} activeLabels={(pricingRange.min || pricingRange.max) ? [`${pricingRange.min || '0'} - ${pricingRange.max || '∞'}`] : []} defaultOpen={false}>
             <div className="flex gap-2 items-center">
               <input 
                 type="number"
@@ -443,14 +462,10 @@ export default function ProvidersPage() {
               />
             </div>
             <p className="text-xs text-on-surface-variant mt-1">Price per 1M tokens (input)</p>
-          </section>
+          </CollapsibleSection>
 
           {/* Throughput Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">speed</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Min Throughput</h3>
-            </div>
+          <CollapsibleSection title="Min Throughput" icon="speed" activeCount={minTps ? 1 : 0} activeLabels={minTps ? [`≥${minTps} TPS`] : []} defaultOpen={false}>
             <input 
               type="number"
               placeholder="Min TPS"
@@ -459,14 +474,10 @@ export default function ProvidersPage() {
               className="w-full px-2 py-1.5 text-sm border border-outline-variant rounded-lg bg-surface text-on-surface focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <p className="text-xs text-on-surface-variant mt-1">Tokens per second</p>
-          </section>
+          </CollapsibleSection>
 
           {/* Features Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">star</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Features</h3>
-            </div>
+          <CollapsibleSection title="Features" icon="star" activeCount={featureFilters.length} activeLabels={featureFilters.map(f => ({ prompt_caching: 'Caching', reasoning: 'Reasoning' }[f] || f))} defaultOpen={false}>
             <div className="flex flex-col gap-2">
               {[
                 { value: 'prompt_caching', label: 'Prompt Caching' },
@@ -483,14 +494,10 @@ export default function ProvidersPage() {
                 </label>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Daily Limit Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">timer</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Daily Limit</h3>
-            </div>
+          <CollapsibleSection title="Daily Limit" icon="timer" activeCount={dailyLimitFilter.length} activeLabels={dailyLimitFilter.map(f => ({ unlimited: 'Unlimited', limited: 'Limited' }[f] || f))} defaultOpen={false}>
             <div className="flex flex-col gap-2">
               {[
                 { value: 'unlimited', label: 'Unlimited' },
@@ -507,14 +514,10 @@ export default function ProvidersPage() {
                 </label>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           {/* Provider Filter */}
-          <section>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="material-symbols-outlined text-[18px] text-secondary">hub</span>
-              <h3 className="font-label-mono text-label-mono text-on-surface font-bold uppercase tracking-tight">Provider</h3>
-            </div>
+          <CollapsibleSection title="Provider" icon="hub" activeCount={selectedProviders.length} activeLabels={providers.filter(p => selectedProviders.includes(p.id)).map(p => p.name)} defaultOpen={false}>
             <div className="flex flex-col gap-2">
               {providers.map(provider => (
                 <label key={provider.id} className="flex items-center gap-3 cursor-pointer group">
@@ -528,7 +531,7 @@ export default function ProvidersPage() {
                 </label>
               ))}
             </div>
-          </section>
+          </CollapsibleSection>
 
           <button 
             onClick={resetAllFilters}
