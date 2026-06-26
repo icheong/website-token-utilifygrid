@@ -1,6 +1,38 @@
 // src/components/InteractiveCalculator.jsx
 import React, { useState, useEffect } from 'react';
 
+function ensureHttps(url) {
+  if (!url) return '#';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `https://${url}`;
+}
+
+function formatTimeAgo(dateString) {
+  if (!dateString) return 'unknown';
+  const now = new Date();
+  const date = new Date(dateString);
+  const seconds = Math.floor((now - date) / 1000);
+  
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function formatTimeUTC(dateString) {
+  if (!dateString) return '--:-- AM UTC';
+  const date = new Date(dateString);
+  return date.toLocaleTimeString('en-US', { 
+    hour: 'numeric', 
+    minute: '2-digit', 
+    hour12: true, 
+    timeZone: 'UTC' 
+  }) + ' UTC';
+}
+
 export default function InteractiveCalculator({ model, providerA, providerB, pricingA, pricingB }) {
   // 1. Initial State Definitions (matching Stitch compare.html slider ranges)
   const [inputVal, setInputVal] = useState(1024);
@@ -244,7 +276,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
         <div className="pt-4 grid grid-cols-1 md:grid-cols-2 items-center gap-4 border-b border-outline-variant pb-8">
           <div>
             <p className="text-xs text-on-surface-variant italic mb-2">
-              Sources: Provider API docs, last updated 12h ago. All prices normalized to 1k tokens.
+              Sources: Provider API docs, last updated {formatTimeAgo(pricingA?.verified_at || pricingB?.verified_at)}. All prices normalized to 1k tokens.
             </p>
             <div className="flex items-center gap-4">
               <span className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
@@ -253,15 +285,20 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               </span>
               <span className="flex items-center gap-1 text-[10px] font-bold text-on-surface-variant">
                 <span className="material-symbols-outlined text-xs">history</span>
-                UPDATED 10:45 AM UTC
+                UPDATED {formatTimeUTC(pricingA?.verified_at || pricingB?.verified_at)}
               </span>
             </div>
           </div>
           <div className="flex justify-end">
-            <button className="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-primary/20">
-              Deploy with $10 Free Credits
-              <span className="material-symbols-outlined">rocket_launch</span>
-            </button>
+            <a 
+              href={ensureHttps(costs.winner === 'A' ? providerA?.affiliate_url : providerB?.affiliate_url)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-primary/20"
+            >
+              {costs.winner === 'A' ? providerA?.name : providerB?.name} Pricing
+              <span className="material-symbols-outlined">open_in_new</span>
+            </a>
           </div>
         </div>
 

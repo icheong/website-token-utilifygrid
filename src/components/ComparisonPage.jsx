@@ -83,17 +83,17 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
             In-Depth Architecture Review: {providerA.name} vs {providerB.name}
           </h2>
           <div className="text-sm leading-relaxed text-on-surface-variant space-y-4">
-            <p>{seoContent?.introduction}</p>
+            <p dangerouslySetInnerHTML={{ __html: seoContent?.introduction }} />
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant pt-2 font-label-mono">
               Pricing Structure &amp; Financial Efficiency
             </h3>
-            <p>{seoContent?.pricingDeepDive}</p>
+            <p dangerouslySetInnerHTML={{ __html: seoContent?.pricingDeepDive }} />
 
             <h3 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant pt-2 font-label-mono">
               Latency Benchmarks &amp; Context Limits
             </h3>
-            <p>{seoContent?.performanceReview}</p>
+            <p dangerouslySetInnerHTML={{ __html: seoContent?.performanceReview }} />
 
             <div className="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant dark:border-outline-dark space-y-2">
               <p className="font-bold">Total Cost Calculus Model Applied:</p>
