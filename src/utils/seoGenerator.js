@@ -2,6 +2,9 @@
 
 function ensureHttps(url) {
   if (!url) return '#';
+  // Extract URL from markdown format [text](url)
+  const markdownMatch = url.match(/\[.*?\]\((.*?)\)/);
+  if (markdownMatch) url = markdownMatch[1];
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `https://${url}`;
 }
