@@ -2,15 +2,71 @@
 // src/pages/vs/[model]/[providerA]-vs-[providerB].astro
 import MainLayout from '../../../layouts/MainLayout.astro';
 import ComparisonPage from '../../../components/ComparisonPage.jsx';
+import { createClient } from '@supabase/supabase-js';
 
-export const prerender = false;
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const supabase = createClient('https://pbazjkkfzyovldltwrkd.supabase.co', 'sb_publishable_-7jL1RyGTKvOiSmN5IUK_Q_OCy4eGcZ');
+
+  const { data: pricing } = await supabase
+    .from('provider_pricing')
+    .select(`
+      model_id,
+      provider_id,
+      *,
+      models (id, slug, name, context_window, max_output, category),
+      providers (id, slug, name, affiliate_url, discount_promo)
+    `);
+
+  if (!pricing) return [];
+
+  const modelProviderMap = {};
+  for (const row of pricing) {
+    const modelSlug = row.models?.slug;
+    const providerSlug = row.providers?.slug;
+    if (!modelSlug || !providerSlug) continue;
+    if (!modelProviderMap[modelSlug]) modelProviderMap[modelSlug] = new Set();
+    modelProviderMap[modelSlug].add(providerSlug);
+  }
+
+  const paths = [];
+
+  for (const [modelSlug, providerSlugs] of Object.entries(modelProviderMap)) {
+    const providers = [...providerSlugs];
+    for (let i = 0; i < providers.length; i++) {
+      for (let j = i + 1; j < providers.length; j++) {
+        const sorted = [providers[i], providers[j]].sort();
+        paths.push({
+          params: {
+            model: modelSlug,
+            providerA: sorted[0],
+            providerB: sorted[1],
+          },
+        });
+      }
+    }
+  }
+
+  return paths;
+}
 
 const { model, providerA, providerB } = Astro.params;
+
+const formatLabel = (slug) => {
+  return slug
+    ? slug.replace(/-/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase())
+    : '';
+};
+
+const formattedModel = formatLabel(model);
+const formattedProviderA = formatLabel(providerA);
+const formattedProviderB = formatLabel(providerB);
 ---
 
 <MainLayout 
-  title={`${providerA?.replace(/-/g, ' ')} vs ${providerB?.replace(/-/g, ' ')} - ${model?.replace(/-/g, ' ')} Pricing`} 
-  description={`Compare ${model?.replace(/-/g, ' ')} pricing interactively. Cost calculator with real-time savings estimates from Supabase.`}
+  title={`${formattedProviderA} vs ${formattedProviderB} - ${formattedModel} Pricing`} 
+  description={`Compare ${formattedModel} pricing interactively. Cost calculator with real-time savings estimates from Supabase.`}
 >
   <ComparisonPage 
     client:load 
