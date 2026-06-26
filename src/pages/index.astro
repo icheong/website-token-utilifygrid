@@ -2,6 +2,8 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import SearchBar from '../components/SearchBar.jsx';
 import TrendingMatchups from '../components/TrendingMatchups.jsx';
+import LiveDashboard from '../components/LiveDashboard.jsx';
+import LiveStats from '../components/LiveStats.jsx';
 ---
 <MainLayout title="Home" description="Tokens@UG - Dynamic AI model pricing comparison platform">
   <!-- Hero Section - Matching Stitch homepage.html design -->
@@ -31,14 +33,7 @@ import TrendingMatchups from '../components/TrendingMatchups.jsx';
           Stop guessing about token overhead. Our protocol monitors latency spikes and pricing shifts across 40+ endpoints every minute, giving you the edge in inference optimization.
         </p>
         <div class="grid grid-cols-2 gap-6">
-          <div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
-            <div class="font-metric-display text-metric-display text-primary mb-1">0.02ms</div>
-            <div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Median Latency</div>
-          </div>
-          <div class="p-6 bg-surface rounded-xl border border-outline-variant custom-shadow">
-            <div class="font-metric-display text-metric-display text-success mb-1">99.9%</div>
-            <div class="font-label-mono text-label-mono text-outline uppercase tracking-widest">Uptime Index</div>
-          </div>
+          <LiveStats client:load />
         </div>
       </div>
       <div class="relative">
@@ -54,18 +49,7 @@ import TrendingMatchups from '../components/TrendingMatchups.jsx';
             </div>
           </div>
           <div class="space-y-4">
-            <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
-              <span class="text-body-md text-on-surface-variant">GPT-4 Turbo</span>
-              <span class="font-metric-display text-metric-display text-primary">$0.01</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
-              <span class="text-body-md text-on-surface-variant">Claude 3.5 Sonnet</span>
-              <span class="font-metric-display text-metric-display text-primary">$0.003</span>
-            </div>
-            <div class="flex items-center justify-between p-3 bg-surface-container rounded-lg">
-              <span class="text-body-md text-on-surface-variant">Llama 3.3 70B</span>
-              <span class="font-metric-display text-metric-display text-primary">$0.0006</span>
-            </div>
+            <LiveDashboard client:load />
           </div>
         </div>
       </div>
