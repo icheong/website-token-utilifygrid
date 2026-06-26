@@ -37,8 +37,9 @@ function formatTimeUTC(dateString) {
   }) + ' UTC';
 }
 
-export default function InteractiveCalculator({ model, providerA, providerB, pricingA, pricingB }) {
+export default function InteractiveCalculator({ model, providerA, providerB, pricingA, pricingB, unit: unitProp }) {
   const { convert, format } = useCurrencyStore();
+  const unit = unitProp || 'monthly';
   
   // 1. Initial State Definitions (matching Stitch compare.html slider ranges)
   const [inputVal, setInputVal] = useState(1024);
@@ -75,7 +76,57 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
     const winner = monthlyA < monthlyB ? 'A' : 'B';
 
     setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner });
-  }, [inputVal, outputVal, volumeVal]);
+  }, [inputVal, outputVal, volumeVal, pricingA, pricingB]);
+
+  // 3. Format cost based on selected unit
+  const formatCost = (single, monthly) => {
+    const totalTokensPerReq = inputVal + outputVal;
+    switch (unit) {
+      case 'perRequest':
+        return format(convert(single));
+      case 'blended': {
+        const blendedRatePer1M = (single / totalTokensPerReq) * 1000000;
+        return format(convert(blendedRatePer1M));
+      }
+      case 'per1mRuns': {
+        const costPer1M = single * 1000000;
+        return format(convert(costPer1M));
+      }
+      case 'monthly':
+      default:
+        return format(convert(monthly));
+    }
+  };
+
+  const getUnitLabel = () => {
+    switch (unit) {
+      case 'perRequest': return 'Per Request';
+      case 'blended': return 'Per 1M Tokens';
+      case 'per1mRuns': return 'Per 1M Runs';
+      case 'monthly':
+      default: return 'Monthly Spend';
+    }
+  };
+
+  const getCostValue = (single, monthly) => {
+    const totalTokensPerReq = inputVal + outputVal;
+    switch (unit) {
+      case 'perRequest':
+        return single;
+      case 'blended':
+        return (single / totalTokensPerReq) * 1000000;
+      case 'per1mRuns':
+        return single * 1000000;
+      case 'monthly':
+      default:
+        return monthly;
+    }
+  };
+
+  const costA = getCostValue(costs.singleA, costs.monthlyA);
+  const costB = getCostValue(costs.singleB, costs.monthlyB);
+  const difference = Math.abs(costA - costB);
+  const winner = costA < costB ? 'A' : 'B';
 
   return (
     <div className="flex-1 max-w-7xl w-full mx-auto px-4 md:px-8 py-8 flex flex-col md:flex-row gap-4">
@@ -163,13 +214,14 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Provider A (Winner) */}
           <div className={`rounded-xl p-6 border relative overflow-hidden group ${
-            costs.winner === 'A' 
-              ? 'border-emerald-200 bg-emerald-50/10' 
+            winner === 'A' 
+              ? 'border-emerald-400 bg-emerald-100/50 shadow-md shadow-emerald-200' 
               : 'border-outline-variant bg-white'
           }`}>
-            {costs.winner === 'A' && (
+            {winner === 'A' && (
               <div className="absolute top-0 right-0 p-3">
-                <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">check</span>
                   Cheapest
                 </span>
               </div>
@@ -185,25 +237,25 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
             </div>
             <div className="space-y-6">
               <div>
-                <p className="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
+                <p className="text-xs text-on-surface-variant mb-1 font-medium">{getUnitLabel()}</p>
                 <p className="font-metric-display text-metric-display text-primary">
-                  {format(convert(costs.singleA))}
+                  {formatCost(costs.singleA, costs.monthlyA)}
                 </p>
               </div>
               <div className={`p-4 rounded-lg border ${
-                costs.winner === 'A' 
-                  ? 'bg-white/60 border-emerald-100/50' 
+                winner === 'A' 
+                  ? 'bg-white/90 border-emerald-300' 
                   : 'bg-surface-container-low border-outline-variant/30'
               }`}>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
                 <p className="font-metric-display text-headline-md text-on-surface">
                   {format(convert(costs.monthlyA))}
                 </p>
-                <div className={`mt-2 h-1 w-full rounded-full overflow-hidden ${
-                  costs.winner === 'A' ? 'bg-emerald-100' : 'bg-surface-container-high'
+                <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
+                  winner === 'A' ? 'bg-emerald-300' : 'bg-surface-container-high'
                 }`}>
-                  <div className={`h-full ${costs.winner === 'A' ? 'bg-success' : 'bg-on-surface-variant'}`} 
-                       style={{width: costs.winner === 'A' ? '60%' : '100%'}}></div>
+                  <div className={`h-full ${winner === 'A' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`} 
+                       style={{width: winner === 'A' ? '60%' : '100%'}}></div>
                 </div>
               </div>
             </div>
@@ -211,13 +263,14 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
 
           {/* Provider B */}
           <div className={`rounded-xl p-6 border relative overflow-hidden group ${
-            costs.winner === 'B' 
-              ? 'border-emerald-200 bg-emerald-50/10' 
+            winner === 'B' 
+              ? 'border-emerald-400 bg-emerald-100/50 shadow-md shadow-emerald-200' 
               : 'border-outline-variant bg-white'
           }`}>
-            {costs.winner === 'B' && (
+            {winner === 'B' && (
               <div className="absolute top-0 right-0 p-3">
-                <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">check</span>
                   Cheapest
                 </span>
               </div>
@@ -233,25 +286,25 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
             </div>
             <div className="space-y-6">
               <div>
-                <p className="text-xs text-on-surface-variant mb-1 font-medium">Cost per Request</p>
+                <p className="text-xs text-on-surface-variant mb-1 font-medium">{getUnitLabel()}</p>
                 <p className="font-metric-display text-metric-display text-on-surface-variant">
-                  {format(convert(costs.singleB))}
+                  {formatCost(costs.singleB, costs.monthlyB)}
                 </p>
               </div>
               <div className={`p-4 rounded-lg border ${
-                costs.winner === 'B' 
-                  ? 'bg-white/60 border-emerald-100/50' 
+                winner === 'B' 
+                  ? 'bg-white/90 border-emerald-300' 
                   : 'bg-surface-container-low border-outline-variant/30'
               }`}>
                 <p className="text-xs text-on-surface-variant mb-1 font-medium">Projected Monthly Spend</p>
                 <p className="font-metric-display text-headline-md text-on-surface">
                   {format(convert(costs.monthlyB))}
                 </p>
-                <div className={`mt-2 h-1 w-full rounded-full overflow-hidden ${
-                  costs.winner === 'B' ? 'bg-emerald-100' : 'bg-surface-container-high'
+                <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
+                  winner === 'B' ? 'bg-emerald-300' : 'bg-surface-container-high'
                 }`}>
-                  <div className={`h-full ${costs.winner === 'B' ? 'bg-success' : 'bg-on-surface-variant'}`}
-                       style={{width: costs.winner === 'B' ? '60%' : '100%'}}></div>
+                  <div className={`h-full ${winner === 'B' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`}
+                       style={{width: winner === 'B' ? '60%' : '100%'}}></div>
                 </div>
               </div>
             </div>
@@ -265,7 +318,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
               <span className="material-symbols-outlined text-[20px]">savings</span>
             </div>
             <div>
-              <p className="font-bold text-emerald-700 leading-none">Estimated Monthly Savings</p>
+              <p className="font-bold text-emerald-700 leading-none">Estimated Savings ({getUnitLabel()})</p>
               <p className="text-sm text-emerald-600/80 mt-1">
                 Calculated against standard hyperscaler pricing (AWS Bedrock, Vertex AI)
               </p>
@@ -273,7 +326,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
           </div>
           <div className="text-right">
             <p className="font-metric-display text-2xl text-success">
-              {format(convert(costs.difference))}
+              {format(convert(difference))}
             </p>
           </div>
         </div>
@@ -297,12 +350,12 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
           </div>
           <div className="flex justify-end">
             <a 
-              href={ensureHttps(costs.winner === 'A' ? providerA?.affiliate_url : providerB?.affiliate_url)}
+              href={ensureHttps(winner === 'A' ? providerA?.affiliate_url : providerB?.affiliate_url)}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-primary/20"
             >
-              {costs.winner === 'A' ? providerA?.name : providerB?.name} Pricing
+              {winner === 'A' ? providerA?.name : providerB?.name} Pricing
               <span className="material-symbols-outlined">open_in_new</span>
             </a>
           </div>

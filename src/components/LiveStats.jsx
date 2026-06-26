@@ -26,11 +26,11 @@ export default function LiveStats() {
 
   if (loading) {
     return (
-      <div class="grid grid-cols-3 gap-6 w-full">
-        {[1, 2, 3].map(() => (
-          <div class="p-5 bg-surface rounded-xl border border-outline-variant custom-shadow animate-pulse">
-            <div class="h-9 bg-outline-variant rounded w-16 mb-3"></div>
-            <div class="h-3 bg-outline-variant rounded w-20"></div>
+      <div className="grid grid-cols-3 gap-6 w-full">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-5 bg-surface rounded-xl border border-outline-variant custom-shadow animate-pulse">
+            <div className="h-9 bg-outline-variant rounded w-16 mb-3"></div>
+            <div className="h-3 bg-outline-variant rounded w-20"></div>
           </div>
         ))}
       </div>

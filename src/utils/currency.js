@@ -98,12 +98,26 @@ export function convertPrice(amount, fromCurrency = 'USD', toCurrency = 'USD', r
 
 export function formatPrice(amount, currency = 'USD', showSymbol = true) {
   const symbol = currencySymbols[currency] || currency;
-  const decimals = currency === 'JPY' ? 0 : 2;
+  
+  let decimals;
+  if (currency === 'JPY') {
+    decimals = 0;
+  } else if (amount === 0) {
+    decimals = 2;
+  } else if (amount < 0.01) {
+    decimals = 6;
+  } else if (amount < 1) {
+    decimals = 4;
+  } else {
+    decimals = 2;
+  }
+  
+  const formatted = amount.toFixed(decimals);
   
   if (showSymbol) {
-    return `${symbol}${amount.toFixed(decimals)}`;
+    return `${symbol}${formatted}`;
   }
-  return amount.toFixed(decimals);
+  return formatted;
 }
 
 export function getCurrencySymbol(currency) {

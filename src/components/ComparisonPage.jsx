@@ -2,8 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { fetchComparison } from '../utils/supabase';
 import InteractiveCalculator from './InteractiveCalculator';
 import { generateProgrammaticSeoContent } from '../utils/seoGenerator';
+import { useCurrencyStore } from '../stores/useCurrencyStore';
+import { convertPrice, getCurrencySymbol } from '../utils/currency';
 
 export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug }) {
+  const { unit, currency, rates } = useCurrencyStore();
+
+  function fmt(usdPrice) {
+    if (!rates || currency === 'USD') return `$${usdPrice}`;
+    const converted = convertPrice(usdPrice, 'USD', currency, rates);
+    return `${getCurrencySymbol(currency)}${converted.toFixed(2)}`;
+  }
   const [data, setData] = useState(null);
   const [seoContent, setSeoContent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,14 +23,6 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
       .then(result => {
         if (result) {
           setData(result);
-          const seo = generateProgrammaticSeoContent(
-            result.model,
-            result.providerA,
-            result.providerB,
-            result.pricingA,
-            result.pricingB
-          );
-          setSeoContent(seo);
         } else {
           setError('Comparison not found in Supabase');
         }
@@ -32,6 +33,20 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
         setLoading(false);
       });
   }, [modelSlug, providerASlug, providerBSlug]);
+
+  useEffect(() => {
+    if (!data) return;
+    const seo = generateProgrammaticSeoContent(
+      data.model,
+      data.providerA,
+      data.providerB,
+      data.pricingA,
+      data.pricingB,
+      currency,
+      rates
+    );
+    setSeoContent(seo);
+  }, [data, currency, rates]);
 
   if (loading) {
     return (
@@ -70,6 +85,7 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
     <>
       <InteractiveCalculator
         client:load
+        unit={unit}
         model={model}
         providerA={providerA}
         providerB={providerB}
@@ -96,13 +112,13 @@ export default function ComparisonPage({ modelSlug, providerASlug, providerBSlug
               <tbody className="divide-y divide-outline-variant">
                 <tr>
                   <td className="py-3 px-4 text-on-surface-variant font-medium">Input Price (per 1M tokens)</td>
-                  <td className="py-3 px-4 font-mono text-on-surface">${pricingA?.input_price_per_m}</td>
-                  <td className="py-3 px-4 font-mono text-on-surface">${pricingB?.input_price_per_m}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{fmt(pricingA?.input_price_per_m)}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{fmt(pricingB?.input_price_per_m)}</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-on-surface-variant font-medium">Output Price (per 1M tokens)</td>
-                  <td className="py-3 px-4 font-mono text-on-surface">${pricingA?.output_price_per_m}</td>
-                  <td className="py-3 px-4 font-mono text-on-surface">${pricingB?.output_price_per_m}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{fmt(pricingA?.output_price_per_m)}</td>
+                  <td className="py-3 px-4 font-mono text-on-surface">{fmt(pricingB?.output_price_per_m)}</td>
                 </tr>
                 <tr>
                   <td className="py-3 px-4 text-on-surface-variant font-medium">Throughput</td>
