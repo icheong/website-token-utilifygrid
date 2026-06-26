@@ -3,11 +3,7 @@
 import MainLayout from '../../../layouts/MainLayout.astro';
 import ComparisonPage from '../../../components/ComparisonPage.jsx';
 
-export async function getStaticPaths() {
-  return [
-    { params: { model: 'llama-3-3-70b', providerA: 'deepinfra', providerB: 'together-ai' } },
-  ];
-}
+export const prerender = false;
 
 const { model, providerA, providerB } = Astro.params;
 ---
