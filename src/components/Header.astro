@@ -7,7 +7,7 @@ interface Props {
   activePage?: string;
 }
 
-const { title = "Tokens@UG", activePage = "models" } = Astro.props;
+const { title = "Tokens@UG", activePage = "" } = Astro.props;
 ---
 
 <nav class="w-full top-0 sticky bg-surface dark:bg-surface-container-dark border-b border-outline-variant dark:border-outline-dark z-50 transition-all duration-200 ease-in-out">
@@ -20,21 +20,12 @@ const { title = "Tokens@UG", activePage = "models" } = Astro.props;
         </span>
       </a>
       <div class="hidden md:flex gap-6 items-center">
-        <a class={`font-body-md text-body-md ${activePage === 'models' ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'} transition-colors duration-200`} href="/">
+        <a class={`font-body-md text-body-md ${activePage === 'models' ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'} transition-colors duration-200`} href="/providers">
           Models
-        </a>
-        <a class={`font-body-md text-body-md ${activePage === 'pricing' ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'} transition-colors duration-200`} href="/pricing">
-          Pricing
-        </a>
-        <a class={`font-body-md text-body-md ${activePage === 'providers' ? 'text-primary border-b-2 border-primary pb-1' : 'text-on-surface-variant hover:text-primary'} transition-colors duration-200`} href="/providers">
-          Providers
         </a>
       </div>
     </div>
     <div class="flex items-center gap-4">
-      <button class="bg-primary-container text-white px-6 py-2.5 rounded-xl font-body-md font-semibold hover:bg-primary transition-colors">
-        Sign Up
-      </button>
       <button class="md:hidden text-on-surface-variant hover:text-primary transition-colors" aria-label="Menu">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="3" y1="12" x2="21" y2="12"></line>

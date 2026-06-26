@@ -6,9 +6,10 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  activePage?: string;
 }
 
-const { title, description = "Tokens@UG - Dynamic AI model pricing comparison platform" } = Astro.props;
+const { title, description = "Tokens@UG - Dynamic AI model pricing comparison platform", activePage = "" } = Astro.props;
 ---
 <html lang="en" class="h-full">
   <head>
@@ -20,7 +21,7 @@ const { title, description = "Tokens@UG - Dynamic AI model pricing comparison pl
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
   </head>
   <body class="bg-background text-on-surface font-body-md h-full flex flex-col antialiased dark:bg-surface-container-dark dark:text-slate-100">
-    <Header title="Tokens@UG" />
+    <Header title="Tokens@UG" activePage={activePage} />
     <main class="flex-grow">
       <slot />
     </main>

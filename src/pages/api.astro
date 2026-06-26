@@ -1,0 +1,186 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+<MainLayout title="API Reference" description="Tokens@UG API documentation for programmatic access to AI model pricing data">
+  <main class="max-w-4xl mx-auto px-4 md:px-8 py-12">
+    <div class="mb-8">
+      <h1 class="font-headline-lg text-headline-lg text-on-surface mb-4">API Reference</h1>
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        Access AI model pricing data programmatically via our REST API.
+      </p>
+    </div>
+
+    <div class="space-y-8">
+      <!-- Authentication -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">key</span>
+          Authentication
+        </h2>
+        <p class="font-body-md text-body-md text-on-surface-variant mb-4">
+          All API requests require an API key passed via the <code class="bg-surface-container px-1.5 py-0.5 rounded text-sm font-mono">Authorization</code> header.
+        </p>
+        <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant">
+          <p class="text-on-surface-variant mb-2">// Example authentication header</p>
+          <p>Authorization: Bearer YOUR_API_KEY</p>
+        </div>
+      </section>
+
+      <!-- Base URL -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">link</span>
+          Base URL
+        </h2>
+        <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant">
+          <p>https://tokens.ugifygrid.com/api/v1</p>
+        </div>
+      </section>
+
+      <!-- Endpoints -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">api</span>
+          Endpoints
+        </h2>
+
+        <div class="space-y-6">
+          <!-- GET /models -->
+          <div class="border border-outline-variant rounded-lg p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-2 py-1 bg-success/10 text-success rounded text-xs font-bold font-mono">GET</span>
+              <code class="font-mono text-sm text-on-surface">/models</code>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-3">
+              Retrieve all available AI models.
+            </p>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Response</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant overflow-x-auto">
+              <pre class="whitespace-pre">{`{
+  "data": [
+    {
+      "id": "uuid",
+      "slug": "llama-3-3-70b",
+      "name": "Llama 3.3 70B Instruct",
+      "context_window": 128000,
+      "max_output": 8192,
+      "category": "LLM"
+    }
+  ]
+}`}</pre>
+            </div>
+          </div>
+
+          <!-- GET /providers -->
+          <div class="border border-outline-variant rounded-lg p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-2 py-1 bg-success/10 text-success rounded text-xs font-bold font-mono">GET</span>
+              <code class="font-mono text-sm text-on-surface">/providers</code>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-3">
+              Retrieve all available inference providers.
+            </p>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Response</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant overflow-x-auto">
+              <pre class="whitespace-pre">{`{
+  "data": [
+    {
+      "id": "uuid",
+      "slug": "deepinfra",
+      "name": "DeepInfra",
+      "affiliate_url": "https://deepinfra.com?ref=tokensug",
+      "discount_promo": "10% off custom enterprise endpoints"
+    }
+  ]
+}`}</pre>
+            </div>
+          </div>
+
+          <!-- GET /pricing -->
+          <div class="border border-outline-variant rounded-lg p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-2 py-1 bg-success/10 text-success rounded text-xs font-bold font-mono">GET</span>
+              <code class="font-mono text-sm text-on-surface">/pricing</code>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-3">
+              Retrieve all pricing data with joined model and provider details.
+            </p>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Query Parameters</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant mb-3">
+              <p><code class="text-primary">model</code> (optional) - Filter by model slug</p>
+              <p><code class="text-primary">provider</code> (optional) - Filter by provider slug</p>
+            </div>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Response</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant overflow-x-auto">
+              <pre class="whitespace-pre">{`{
+  "data": [
+    {
+      "id": "uuid",
+      "input_price_per_m": 0.55,
+      "output_price_per_m": 0.55,
+      "latency_tps": 85,
+      "models": { "slug": "llama-3-3-70b", "name": "..." },
+      "providers": { "slug": "deepinfra", "name": "..." }
+    }
+  ]
+}`}</pre>
+            </div>
+          </div>
+
+          <!-- GET /pricing/:model -->
+          <div class="border border-outline-variant rounded-lg p-4">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="px-2 py-1 bg-success/10 text-success rounded text-xs font-bold font-mono">GET</span>
+              <code class="font-mono text-sm text-on-surface">/pricing/:model</code>
+            </div>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-3">
+              Retrieve pricing for a specific model across all providers.
+            </p>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Path Parameters</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant mb-3">
+              <p><code class="text-primary">model</code> - Model slug (e.g., "llama-3-3-70b")</p>
+            </div>
+            <h4 class="font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Response</h4>
+            <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant overflow-x-auto">
+              <pre class="whitespace-pre">{`{
+  "model": { "slug": "llama-3-3-70b", "name": "..." },
+  "pricing": [
+    {
+      "provider": { "slug": "deepinfra", "name": "DeepInfra" },
+      "input_price_per_m": 0.55,
+      "output_price_per_m": 0.55,
+      "latency_tps": 85
+    }
+  ]
+}`}</pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Rate Limits -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">speed</span>
+          Rate Limits
+        </h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          API requests are rate-limited to 100 requests per minute per API key. Exceeding this limit will return a <code class="bg-surface-container px-1.5 py-0.5 rounded text-sm font-mono">429 Too Many Requests</code> response.
+        </p>
+      </section>
+
+      <!-- Example -->
+      <section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-6">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-4 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">code</span>
+          Example Request
+        </h2>
+        <div class="bg-surface-container dark:bg-surface-container-dark rounded-lg p-4 font-mono text-xs border border-outline-variant overflow-x-auto">
+          <pre class="whitespace-pre">{`curl -X GET "https://tokens.ugifygrid.com/api/v1/pricing?model=llama-3-3-70b" \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json"`}</pre>
+        </div>
+      </section>
+    </div>
+  </main>
+</MainLayout>
