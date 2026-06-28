@@ -14,7 +14,7 @@ export default function ToolsSidebar({ activeTool, onToolChange }) {
     <aside className="w-full md:w-64 shrink-0">
       <div className="bg-surface-container-low border border-outline-variant rounded-xl p-3 flex flex-col gap-1">
         <div className="px-3 py-2 mb-1">
-          <h2 className="font-headline-md text-sm font-bold text-on-surface">LLM Tools</h2>
+          <h2 className="font-headline-md text-sm font-bold text-on-surface">LLM Power Tools</h2>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Developer utilities</p>
         </div>
         {TOOLS.map(tool => (

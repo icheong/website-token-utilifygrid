@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const HALLUCINATION_SIGNALS = [
   { id: 'hedging', label: 'Hedging Language', pattern: /\b(might|could|possibly|perhaps|maybe|it seems|appears to be|likely|unlikely|may have|might have|could have)\b/gi, weight: 0.3, description: 'Qualifiers suggest uncertainty' },
@@ -9,18 +9,23 @@ const HALLUCINATION_SIGNALS = [
   { id: 'temporal', label: 'Temporal Claims', pattern: /\b(since \d{4}|in \d{4}|before \d{4}|after \d{4}|recently|last year|this year)\b/gi, weight: 0.3, description: 'Time-based claims to verify' },
 ];
 
-export default function HallucinationDetector() {
-  const [claim, setClaim] = useState('');
+export default function HallucinationDetector({ prompt }) {
   const [analysis, setAnalysis] = useState(null);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+
+  useEffect(() => {
+    setAnalysis(null);
+    setHasAnalyzed(false);
+  }, [prompt]);
 
   const analyze = () => {
-    if (!claim.trim()) return;
+    if (!prompt.trim()) return;
 
     const signals = [];
     let totalScore = 0;
 
     HALLUCINATION_SIGNALS.forEach(signal => {
-      const matches = claim.match(signal.pattern);
+      const matches = prompt.match(signal.pattern);
       if (matches) {
         const score = Math.min(matches.length * signal.weight, 1);
         totalScore += score;
@@ -35,12 +40,8 @@ export default function HallucinationDetector() {
 
     const riskLevel = totalScore > 2 ? 'high' : totalScore > 1 ? 'medium' : totalScore > 0 ? 'low' : 'minimal';
 
-    setAnalysis({ signals, totalScore, riskLevel, wordCount: claim.split(/\s+/).length });
-  };
-
-  const clear = () => {
-    setClaim('');
-    setAnalysis(null);
+    setAnalysis({ signals, totalScore, riskLevel, wordCount: prompt.split(/\s+/).length });
+    setHasAnalyzed(true);
   };
 
   const riskColors = {
@@ -60,23 +61,16 @@ export default function HallucinationDetector() {
           <h3 className="font-headline-md text-sm font-bold text-on-surface">Hallucination Detector</h3>
         </div>
         <p className="text-xs text-on-surface-variant mb-3">
-          Paste an LLM-generated claim or response to check for common hallucination patterns. This is a heuristic check — always verify important facts independently.
+          Analyze LLM-generated text for common hallucination patterns. This is a heuristic check — always verify important facts independently.
         </p>
-        <textarea
-          value={claim}
-          onChange={(e) => setClaim(e.target.value)}
-          placeholder="Paste an LLM response to analyze for potential hallucinations..."
-          className="w-full h-40 bg-surface border border-outline-variant rounded-lg p-3 text-sm text-on-surface placeholder:text-on-surface-variant/50 resize-none focus:outline-none focus:border-primary transition-colors"
-        />
-        <div className="flex gap-2 mt-3">
-          <button onClick={analyze} disabled={!claim.trim()}
+        <div className="flex gap-2">
+          <button onClick={analyze} disabled={!prompt.trim()}
             className="px-4 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
             Analyze
           </button>
-          <button onClick={clear}
-            className="px-4 py-2 bg-surface-container text-on-surface-variant rounded-lg text-xs font-medium hover:bg-surface-container-high transition-all">
-            Clear
-          </button>
+          {hasAnalyzed && (
+            <span className="text-[10px] text-on-surface-variant self-center">Analyzing the prompt above</span>
+          )}
         </div>
       </div>
 
@@ -121,6 +115,13 @@ export default function HallucinationDetector() {
           <div className="mt-4 p-3 bg-surface rounded-lg text-[10px] text-on-surface-variant">
             <strong>Disclaimer:</strong> This tool uses pattern matching to flag potential issues. It cannot determine if content is factually correct. Always cross-reference important information with authoritative sources.
           </div>
+        </div>
+      )}
+
+      {!hasAnalyzed && !prompt && (
+        <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-8 text-center">
+          <span className="material-symbols-outlined text-[32px] text-on-surface-variant/30">fact_check</span>
+          <p className="text-sm text-on-surface-variant mt-2">Enter a prompt above, then click "Analyze"</p>
         </div>
       )}
     </div>
