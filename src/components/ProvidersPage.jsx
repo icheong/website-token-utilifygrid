@@ -55,6 +55,7 @@ export default function ProvidersPage() {
   const [pricingRange, setPricingRange] = useState({ min: '', max: '' });
   const [minTps, setMinTps] = useState('');
   const [dailyLimitFilter, setDailyLimitFilter] = useState([]);
+  const [multiProviderOnly, setMultiProviderOnly] = useState(true);
   const [expandedModel, setExpandedModel] = useState(null);
 
   // Comparison selection states
@@ -251,6 +252,11 @@ export default function ProvidersPage() {
 
   // Filter models based on all criteria
   const filteredModels = models.filter(model => {
+    // Multi-provider filter (default on)
+    if (multiProviderOnly && model.providers.length < 2) {
+      return false;
+    }
+
     // Provider filter
     if (selectedProviders.length > 0) {
       if (!model.providers.some(p => selectedProviders.includes(p.id))) {
@@ -366,7 +372,7 @@ export default function ProvidersPage() {
     );
   }
 
-  const hasActiveFilters = selectedProviders.length > 0 || contextFilters.length > 0 || modelClassFilters.length > 0 || 
+  const hasActiveFilters = !multiProviderOnly || selectedProviders.length > 0 || contextFilters.length > 0 || modelClassFilters.length > 0 || 
     categoryFilters.length > 0 || featureFilters.length > 0 || pricingRange.min !== '' || pricingRange.max !== '' || 
     minTps !== '' || dailyLimitFilter.length > 0;
 
@@ -378,6 +384,19 @@ export default function ProvidersPage() {
           <div className="flex flex-col gap-1 mb-1">
             <h2 className="font-headline-md text-[18px] text-primary">Technical Filters</h2>
             <p className="font-label-mono text-label-mono text-on-surface-variant opacity-70 uppercase tracking-wider text-[10px]">Refine search criteria</p>
+          </div>
+
+          {/* Multi-provider toggle */}
+          <div className="flex items-center justify-between p-2.5 bg-primary/5 border border-primary/15 rounded-lg">
+            <span className="font-body-sm text-body-sm text-on-surface font-medium">Multi-provider only</span>
+            <button
+              onClick={() => setMultiProviderOnly(!multiProviderOnly)}
+              className={`relative w-10 h-[22px] rounded-full transition-colors ${multiProviderOnly ? 'bg-primary' : 'bg-outline-variant'}`}
+              role="switch"
+              aria-checked={multiProviderOnly}
+            >
+              <span className={`absolute top-[3px] left-[3px] w-4 h-4 bg-white rounded-full shadow transition-transform ${multiProviderOnly ? 'translate-x-[18px]' : ''}`}></span>
+            </button>
           </div>
           
           {/* Context Window Filter */}
@@ -587,8 +606,8 @@ export default function ProvidersPage() {
 
       {/* Main Column: Model Directory (75%) */}
       <div className="flex-1 min-w-0">
-        {/* Comparison Selection Panel - Horizontal Layout */}
-        <div className="mb-6 p-4 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm">
+        {/* Comparison Selection Panel - Horizontal Layout (Sticky) */}
+        <div className="sticky top-16 z-30 mb-6 p-4 bg-surface-container-lowest border border-outline-variant rounded-xl shadow-md">
           {/* Header with icon and instruction */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">

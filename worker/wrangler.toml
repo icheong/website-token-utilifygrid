@@ -1,11 +1,11 @@
-name = "pricing-sync-worker"
+name = "tokens-ug"
 main = "src/index.js"
-compatibility_date = "2026-05-09"
+compatibility_date = "2026-06-26"
+compatibility_flags = ["nodejs_compat"]
 
 [triggers]
-crons = [ "0 0 * * *" ] # Run once every night at midnight
+crons = [ "0 0 * * *" ]
 
 [vars]
 SUPABASE_URL = "https://pbazjkkfzyovldltwrkd.supabase.co"
 SUPABASE_ANON_KEY = "sb_publishable_-7jL1RyGTKvOiSmN5IUK_Q_OCy4eGcZ"
-ASTRO_BUILD_WEBHOOK = "worker-sync-trigger"

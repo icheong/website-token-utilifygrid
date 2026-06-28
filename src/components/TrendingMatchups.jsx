@@ -45,9 +45,11 @@ export default function TrendingMatchups() {
 
   if (loading) {
     return (
-      <div className="mt-8 flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-        <div className="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface-variant animate-pulse">
-          Loading matchups...
+      <div className="mt-4 max-w-3xl mx-auto">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="px-3 py-1 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs text-on-surface-variant animate-pulse">
+            Loading...
+          </div>
         </div>
       </div>
     );
@@ -58,17 +60,19 @@ export default function TrendingMatchups() {
   }
 
   return (
-    <div className="mt-8 flex flex-wrap justify-center gap-3 max-w-3xl mx-auto">
-      {matchups.map((m, i) => (
-        <a
-          key={i}
-          href={m.href}
-          className="px-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-md text-on-surface-variant hover:border-primary-container hover:text-primary transition-all cursor-pointer flex items-center gap-2"
-        >
-          <span className="font-label-mono text-[10px] text-outline">PROMPT</span>
-          {m.label}
-        </a>
-      ))}
+    <div className="mt-4 max-w-3xl mx-auto overflow-hidden">
+      <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 -mx-1 px-1">
+        {matchups.map((m, i) => (
+          <a
+            key={i}
+            href={m.href}
+            className="shrink-0 px-3 py-1 bg-surface-container-lowest border border-outline-variant rounded-lg text-xs text-on-surface-variant hover:border-primary-container hover:text-primary transition-all cursor-pointer flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-[12px] text-outline">arrow_forward</span>
+            {m.label}
+          </a>
+        ))}
+      </div>
     </div>
   );
 }

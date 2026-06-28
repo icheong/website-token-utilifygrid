@@ -64,6 +64,17 @@ export default function SearchBar() {
   }, [query, comparisons]);
 
   useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     function handleClickOutside(e) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
         setIsOpen(false);
@@ -101,8 +112,8 @@ export default function SearchBar() {
           disabled={loading}
           className="flex-grow bg-transparent outline-none mono-font text-on-surface-variant placeholder:text-on-surface-variant/50 disabled:opacity-50"
         />
-        <kbd className="hidden md:flex items-center gap-1 font-label-mono text-[10px] px-2 py-1 bg-surface-container rounded border border-outline-variant text-outline">
-          <span className="material-symbols-outlined text-[12px]">keyboard_command_key</span>K
+        <kbd className="hidden md:flex items-center gap-1 font-label-mono text-[10px] px-2 py-1 bg-surface-container rounded border border-outline-variant text-outline select-none pointer-events-none">
+          /
         </kbd>
       </form>
       {isOpen && suggestions.length > 0 && (

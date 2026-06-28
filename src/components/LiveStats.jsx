@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { fetchPricing } from '../utils/supabase';
 
 export default function LiveStats() {
-  const [stats, setStats] = useState({ modelCount: 0, avgTps: 0, providerCount: 0 });
+  const [stats, setStats] = useState({ modelCount: 0, avgPrice: '0', providerCount: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -11,10 +11,10 @@ export default function LiveStats() {
       .then(data => {
         if (data && data.length > 0) {
           const uniqueModels = new Set(data.map(p => p.model_id)).size;
-          const totalTps = data.reduce((sum, p) => sum + (p.latency_tps || 0), 0);
-          const avgTps = data.length > 0 ? (totalTps / data.length).toFixed(1) : 0;
+          const prices = data.filter(p => p.input_price_per_m > 0).map(p => p.input_price_per_m);
+          const avgPrice = prices.length > 0 ? (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2) : '0';
           const uniqueProviders = new Set(data.map(p => p.provider_id)).size;
-          setStats({ modelCount: uniqueModels, avgTps, providerCount: uniqueProviders });
+          setStats({ modelCount: uniqueModels, avgPrice, providerCount: uniqueProviders });
         }
         setLoading(false);
       })
@@ -39,7 +39,7 @@ export default function LiveStats() {
 
   const items = [
     { value: stats.modelCount, label: 'Models', color: 'text-primary' },
-    { value: `${stats.avgTps} TPS`, label: 'Avg Throughput', color: 'text-secondary' },
+    { value: `$${stats.avgPrice}`, label: 'Avg Input / 1M', color: 'text-secondary' },
     { value: stats.providerCount, label: 'Providers', color: 'text-tertiary' },
   ];
 
