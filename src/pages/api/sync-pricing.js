@@ -1,6 +1,6 @@
 // src/pages/api/sync-pricing.js
 // Multi-source pricing sync — bulk-optimized for Cloudflare's subrequest limit
-// Sources: OpenRouter, OpenAI, Anthropic, Mistral, DeepInfra, Together AI, Groq, Fireworks
+// Sources: OpenRouter, OpenAI, Anthropic, Mistral, DeepInfra, Together AI, Groq, Fireworks, Artificial Analysis
 
 export const prerender = false;
 
@@ -21,10 +21,33 @@ const PROVIDER_INFO = {
   'together-ai': { name: 'Together AI', url: 'https://together.ai' },
   groq: { name: 'Groq', url: 'https://groq.com' },
   fireworks: { name: 'Fireworks AI', url: 'https://fireworks.ai' },
+  'artificial-analysis': { name: 'Artificial Analysis', url: 'https://artificialanalysis.ai' },
 };
 
 function slugify(t) { return t.toLowerCase().replace(/:free$/, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function titleCase(s) { return s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()); }
+
+// Generate a proper display name from a raw model ID
+function generateModelName(rawId) {
+  if (!rawId) return '';
+  // Strip org prefix
+  let n = rawId.replace(/^[^/]+\//, '');
+  // Replace hyphens/underscores with spaces
+  n = n.replace(/[-_]+/g, ' ');
+  // Split and format each word
+  n = n.split(' ').map(w => {
+    if (!w) return '';
+    // Already uppercase acronym (2+ chars): keep as-is
+    if (/^[A-Z]{2,}$/.test(w)) return w;
+    // Number followed by unit: "300m" → "300M", "70b" → "70B"
+    if (/^\d+[a-z]+$/i.test(w)) return w.replace(/[a-z]+$/i, m => m.toUpperCase());
+    // Starts with uppercase and has lowercase: likely already proper (e.g. "Llama")
+    if (/^[A-Z][a-z]/.test(w)) return w;
+    // All lowercase — capitalize first letter
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }).join(' ');
+  return n;
+}
 
 // Normalize model name to a canonical slug that matches across providers
 function normalizeModelSlug(rawName) {
@@ -76,8 +99,9 @@ function parseOpenRouterModels(data) {
   return (data || []).filter(m => m.pricing && !m.id.endsWith(':free') && parseFloat(m.pricing.prompt) > 0).map(m => {
     const parts = m.id.split('/');
     const org = parts[0], name = parts.slice(1).join('/');
+    const modelName = (m.name && m.name !== m.id) ? m.name : generateModelName(m.id);
     return {
-      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.id), modelName: m.name || name,
+      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.id), modelName,
       providerSlug: slugify(org), input: parseFloat(m.pricing.prompt) * 1e6, output: parseFloat(m.pricing.completion) * 1e6,
       contextWindow: m.context_length || null, maxOutput: m.top_provider?.max_completion_tokens || null, source: 'openrouter',
     };
@@ -137,8 +161,9 @@ function parseDeepInfraModels(data) {
   }).map(m => {
     const p = extractDeepInfraPricing(m);
     const meta = m.metadata || {};
+    const modelName = (m.name && m.name !== m.id) ? m.name : generateModelName(m.id);
     return {
-      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.id), modelName: m.name || m.id,
+      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.id), modelName,
       providerSlug: 'deepinfra', input: p.input, output: p.output,
       contextWindow: meta.context_length || null, maxOutput: meta.max_tokens || null, source: 'deepinfra',
     };
@@ -212,6 +237,30 @@ function parseFireworksModels(data) {
   }));
 }
 
+// Artificial Analysis: pricing already per 1M tokens — no multiplication needed
+function parseArtificialAnalysisModels(data) {
+  if (!data?.data) return [];
+  return data.data.filter(m => m.pricing?.price_1m_input_tokens > 0).map(m => {
+    const creator = m.model_creator?.name || 'Unknown';
+    const creatorSlug = slugify(creator);
+    return {
+      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.slug || m.name), modelName: m.name,
+      providerSlug: creatorSlug, input: m.pricing.price_1m_input_tokens, output: m.pricing.price_1m_output_tokens,
+      contextWindow: m.context_window_tokens || null, maxOutput: null, source: 'artificialanalysis',
+      // Extra AA-specific data
+      _aa: {
+        intelligenceIndex: m.evaluations?.artificial_analysis_intelligence_index || null,
+        codingIndex: m.evaluations?.artificial_analysis_coding_index || null,
+        agenticIndex: m.evaluations?.artificial_analysis_agentic_index || null,
+        medianTps: m.performance?.median_output_tokens_per_second || null,
+        medianTtft: m.performance?.median_time_to_first_token_seconds || null,
+        releaseDate: m.release_date || null,
+        reasoningModel: m.reasoning_model || false,
+      },
+    };
+  });
+}
+
 async function bulkUpsert(baseUrl, headers, table, rows, conflictCols) {
   if (rows.length === 0) return { rows: [], errors: [] };
   const all = [];
@@ -278,6 +327,8 @@ async function syncAll(env, sourceFilter, clear) {
   if (want('together-ai') && env.TOGETHER_API_KEY) apiFetches.push(['together-ai', fetch('https://api.together.xyz/v1/models', authH(env.TOGETHER_API_KEY))]);
   if (want('groq') && env.GROQ_API_KEY) apiFetches.push(['groq', fetch('https://api.groq.com/openai/v1/models', authH(env.GROQ_API_KEY))]);
   if (want('fireworks') && env.FIREWORKS_API_KEY) apiFetches.push(['fireworks', fetch('https://api.fireworks.ai/inference/v1/models', authH(env.FIREWORKS_API_KEY))]);
+  const AA_KEY = env.ARTIFICIAL_ANALYSIS_API_KEY || 'aa_cMOrZeGwuDNnbGeWCDZytwrSUxDkWrJX';
+  if (want('artificialanalysis')) apiFetches.push(['artificialanalysis', fetch('https://artificialanalysis.ai/api/v2/language/models/free', { headers: { 'x-api-key': AA_KEY } })]);
 
   const apiResults = await Promise.all(apiFetches.map(([, p]) => p));
   const apiMap = {};
@@ -323,6 +374,14 @@ async function syncAll(env, sourceFilter, clear) {
     allParsed.push(...p);
     sourceResults.fireworks = p.length;
   }
+  if (want('artificialanalysis') && apiMap.artificialanalysis?.ok) {
+    const aaData = await apiMap.artificialanalysis.json();
+    const p = parseArtificialAnalysisModels(aaData);
+    allParsed.push(...p);
+    sourceResults.artificialanalysis = p.length;
+  } else if (want('artificialanalysis') && apiMap.artificialanalysis && !apiMap.artificialanalysis.ok) {
+    sourceResults.artificialanalysis = `fail:${apiMap.artificialanalysis.status}`;
+  }
 
   // 4. Build unique providers and models
   const providerMap = {};
@@ -363,12 +422,13 @@ async function syncAll(env, sourceFilter, clear) {
     .map(e => ({
       model_id: mMap[e.modelSlug], provider_id: pMap[e.providerSlug], source_id: srcMap[e.source],
       source_model_id: e.sourceModelId, input_price_per_m: clamp(e.input), output_price_per_m: clamp(e.output),
-      reasoning_price_per_m: 0, latency_tps: 0, prompt_caching: false, daily_limit: 'Unlimited', verified_at: now,
+      reasoning_price_per_m: e._aa?.intelligenceIndex || 0, latency_tps: Math.round(e._aa?.medianTps || 0),
+      prompt_caching: false, daily_limit: 'Unlimited', verified_at: now,
     }));
 
   // 7b. Deduplicate by (model_id, provider_id) — DB constraint doesn't include source_id
   // Keep the row with the best data (prefer non-zero, prefer direct sources over openrouter)
-  const sourcePriority = { anthropic: 0, openai: 0, deepinfra: 1, groq: 1, mistral: 1, fireworks: 1, 'together-ai': 1, openrouter: 2 };
+  const sourcePriority = { anthropic: 0, openai: 0, deepinfra: 1, groq: 1, mistral: 1, fireworks: 1, 'together-ai': 1, artificialanalysis: 1, openrouter: 2 };
   const dedupedMap = new Map();
   for (const row of allPricingRows) {
     const key = `${row.model_id}|${row.provider_id}`;

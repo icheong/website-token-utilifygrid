@@ -170,6 +170,23 @@ function parseFireworksModels(data) {
   }));
 }
 
+function parseArtificialAnalysisModels(data) {
+  if (!data?.data) return [];
+  return data.data.filter(m => m.pricing?.price_1m_input_tokens > 0).map(m => {
+    const creator = m.model_creator?.name || 'Unknown';
+    const creatorSlug = creator.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return {
+      sourceModelId: m.id, modelSlug: normalizeModelSlug(m.slug || m.name), modelName: m.name,
+      providerSlug: creatorSlug, input: m.pricing.price_1m_input_tokens, output: m.pricing.price_1m_output_tokens,
+      contextWindow: m.context_window_tokens || null, maxOutput: null, source: 'artificialanalysis',
+      _aa: {
+        intelligenceIndex: m.evaluations?.artificial_analysis_intelligence_index || null,
+        medianTps: m.performance?.median_output_tokens_per_second || null,
+      },
+    };
+  });
+}
+
 const BATCH = 80;
 async function bulkUpsert(base, hdrs, table, rows, conflict) {
   if (!rows.length) return [];
@@ -192,13 +209,15 @@ async function syncAll(env) {
   const srcMap = {}; sources.forEach(s => { srcMap[s.slug] = s.id; });
 
   const authH = (key) => key ? { headers: { Authorization: `Bearer ${key}` } } : {};
-  const [orRes, deepinfraRes, mistralRes, togetherRes, groqRes, fireworksRes] = await Promise.all([
+  const AA_KEY = env.ARTIFICIAL_ANALYSIS_API_KEY || '';
+  const [orRes, deepinfraRes, mistralRes, togetherRes, groqRes, fireworksRes, aaRes] = await Promise.all([
     fetch('https://openrouter.ai/api/v1/models'),
     fetch('https://api.deepinfra.com/v1/openai/models'),
     env.MISTRAL_API_KEY ? fetch('https://api.mistral.ai/v1/models', authH(env.MISTRAL_API_KEY)) : Promise.resolve(null),
     env.TOGETHER_API_KEY ? fetch('https://api.together.xyz/v1/models', authH(env.TOGETHER_API_KEY)) : Promise.resolve(null),
     env.GROQ_API_KEY ? fetch('https://api.groq.com/openai/v1/models', authH(env.GROQ_API_KEY)) : Promise.resolve(null),
     env.FIREWORKS_API_KEY ? fetch('https://api.fireworks.ai/inference/v1/models', authH(env.FIREWORKS_API_KEY)) : Promise.resolve(null),
+    AA_KEY ? fetch('https://artificialanalysis.ai/api/v2/language/models/free', { headers: { 'x-api-key': AA_KEY } }) : Promise.resolve(null),
   ]);
 
   const allParsed = [];
@@ -209,6 +228,7 @@ async function syncAll(env) {
   if (togetherRes?.ok) { allParsed.push(...parseTogetherModels(await togetherRes.json())); }
   if (groqRes?.ok) { allParsed.push(...parseGroqModels(await groqRes.json())); }
   if (fireworksRes?.ok) { allParsed.push(...parseFireworksModels(await fireworksRes.json())); }
+  if (aaRes?.ok) { allParsed.push(...parseArtificialAnalysisModels(await aaRes.json())); }
 
   const provMap = {}, modMap = {};
   for (const e of allParsed) {
@@ -241,11 +261,12 @@ async function syncAll(env) {
   const allPricingRows = allParsed.filter(e => mM[e.modelSlug] && pM[e.providerSlug] && srcMap[e.source]).map(e => ({
     model_id: mM[e.modelSlug], provider_id: pM[e.providerSlug], source_id: srcMap[e.source], source_model_id: e.sourceModelId,
     input_price_per_m: clamp(e.input), output_price_per_m: clamp(e.output),
-    reasoning_price_per_m: 0, latency_tps: 0, prompt_caching: false, daily_limit: 'Unlimited', verified_at: now,
+    reasoning_price_per_m: e._aa?.intelligenceIndex || 0, latency_tps: Math.round(e._aa?.medianTps || 0),
+    prompt_caching: false, daily_limit: 'Unlimited', verified_at: now,
   }));
 
   // Deduplicate by (model_id, provider_id) — DB constraint doesn't include source_id
-  const sourcePriority = { anthropic: 0, openai: 0, deepinfra: 1, groq: 1, mistral: 1, fireworks: 1, 'together-ai': 1, openrouter: 2 };
+  const sourcePriority = { anthropic: 0, openai: 0, deepinfra: 1, groq: 1, mistral: 1, fireworks: 1, 'together-ai': 1, artificialanalysis: 1, openrouter: 2 };
   const dedupedMap = new Map();
   for (const row of allPricingRows) {
     const key = `${row.model_id}|${row.provider_id}`;

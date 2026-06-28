@@ -1,6 +1,6 @@
 // src/components/ProvidersPage.jsx
 import React, { useState, useEffect } from 'react';
-import { fetchPricing, fetchProviders } from '../utils/supabase';
+import { fetchPricing, fetchProviders, fetchLastSynced } from '../utils/supabase';
 import { useCurrencyStore } from '../stores/useCurrencyStore';
 
 function CollapsibleSection({ title, icon, activeCount = 0, activeLabels = [], defaultOpen = false, children }) {
@@ -57,6 +57,7 @@ export default function ProvidersPage() {
   const [dailyLimitFilter, setDailyLimitFilter] = useState([]);
   const [multiProviderOnly, setMultiProviderOnly] = useState(true);
   const [expandedModel, setExpandedModel] = useState(null);
+  const [lastSynced, setLastSynced] = useState(null);
 
   // Comparison selection states
   const [selectedModel, setSelectedModel] = useState(null);
@@ -66,10 +67,11 @@ export default function ProvidersPage() {
   const [pricingData, setPricingData] = useState([]);
 
   useEffect(() => {
-    Promise.all([fetchPricing(), fetchProviders()])
-      .then(([pricing, providersData]) => {
+    Promise.all([fetchPricing(), fetchProviders(), fetchLastSynced()])
+      .then(([pricing, providersData, synced]) => {
         setProviders(providersData);
         setPricingData(pricing);
+        setLastSynced(synced);
         
         const modelMap = {};
         pricing.forEach(item => {
@@ -133,6 +135,17 @@ export default function ProvidersPage() {
 
   // Get unique categories from models
   const categories = [...new Set(models.map(m => m.category).filter(Boolean))];
+
+  function timeAgo(dateStr) {
+    const seconds = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+    if (seconds < 60) return 'Just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  }
 
   const toggleProvider = (providerId) => {
     setSelectedProviders(prev => 
@@ -234,21 +247,6 @@ export default function ProvidersPage() {
     const slugs = [selectedProvidersForCompare[0].slug, selectedProvidersForCompare[1].slug].sort();
     return `/vs/${selectedModel.slug}/${slugs[0]}-vs-${slugs[1]}`;
   };
-
-  // Calculate network stats from pricing data
-  const networkStats = React.useMemo(() => {
-    if (models.length === 0) return { avgTps: 0, loadPercent: 0, status: 'Optimal' };
-    
-    const totalTps = models.reduce((sum, m) => sum + (m.maxPrice > 0 ? 100 : 50), 0);
-    const avgTps = Math.round(totalTps / models.length);
-    const loadPercent = Math.min(Math.round((models.length / 10) * 100), 100);
-    
-    let status = 'Optimal';
-    if (loadPercent > 75) status = 'High';
-    else if (loadPercent > 50) status = 'Moderate';
-    
-    return { avgTps, loadPercent, status };
-  }, [models]);
 
   // Filter models based on all criteria
   const filteredModels = models.filter(model => {
@@ -563,43 +561,13 @@ export default function ProvidersPage() {
             Reset All Filters
           </button>
         </div>
-        <div className="p-4 bg-surface-container-lowest border border-outline-variant rounded-xl bg-primary-container-light/30">
-          <div className="flex justify-between items-center mb-1">
-            <div className="flex items-center gap-1.5">
-              <span className="font-label-mono text-label-mono text-primary font-bold">Network Load</span>
-              <div className="relative group/icon">
-                <span className="material-symbols-outlined text-[14px] text-on-surface-variant cursor-help">help</span>
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-56 px-3 py-2 bg-surface-container-dark text-white text-xs rounded-lg opacity-0 invisible group-hover/icon:opacity-100 group-hover/icon:visible transition-all duration-200 z-50 pointer-events-none shadow-lg">
-                  <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-2.5 h-2.5 bg-surface-container-dark rotate-45"></div>
-                  <div className="relative">
-                    <p className="font-bold mb-1">Network Load</p>
-                    <p className="text-slate-300">Indicates platform utilization based on {models.length} indexed models across {providers.length} active providers.</p>
-                    <p className="mt-1">
-                      <span className={networkStats.status === 'Optimal' ? 'text-green-400' : networkStats.status === 'Moderate' ? 'text-yellow-400' : 'text-red-400'}>
-                        {networkStats.status}:
-                      </span> {networkStats.loadPercent}% capacity utilized
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <span className={`font-label-mono text-label-mono ${
-              networkStats.status === 'Optimal' ? 'text-success' : 
-              networkStats.status === 'Moderate' ? 'text-warning' : 'text-error'
-            }`}>{networkStats.status}</span>
-          </div>
-          <div className="w-full bg-surface-container h-1 rounded-full overflow-hidden">
-            <div 
-              className={`h-full transition-all duration-500 ${
-                networkStats.loadPercent > 75 ? 'bg-error' : 
-                networkStats.loadPercent > 50 ? 'bg-warning' : 'bg-primary'
-              }`} 
-              style={{ width: `${networkStats.loadPercent}%` }}
-            ></div>
-          </div>
-          <div className="mt-2 flex justify-between text-xs font-label-mono text-on-surface-variant">
-            <span>{models.length} models indexed</span>
-            <span>{providers.length} providers active</span>
+        <div className="p-3 bg-surface-container-lowest border border-outline-variant rounded-xl flex items-center gap-2.5">
+          <span className="material-symbols-outlined text-[16px] text-on-surface-variant">schedule</span>
+          <div className="min-w-0">
+            <p className="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-wider">Last updated</p>
+            <p className="font-body-sm text-body-sm text-on-surface font-medium truncate">
+              {lastSynced ? timeAgo(lastSynced) : 'Never'}
+            </p>
           </div>
         </div>
       </aside>

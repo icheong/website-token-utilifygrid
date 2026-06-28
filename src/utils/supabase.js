@@ -45,6 +45,20 @@ export async function fetchPricing() {
   return data || [];
 }
 
+export async function fetchLastSynced() {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from('pricing_sources')
+    .select('slug, last_synced_at')
+    .order('last_synced_at', { ascending: false });
+  if (error) return null;
+  if (!data || data.length === 0) return null;
+  return data.reduce((latest, s) => {
+    if (!s.last_synced_at) return latest;
+    return !latest || new Date(s.last_synced_at) > new Date(latest) ? s.last_synced_at : latest;
+  }, null);
+}
+
 export async function fetchModelPricing(modelSlug) {
   const supabase = getSupabase();
   const { data: model, error: modelError } = await supabase

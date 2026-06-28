@@ -9,3 +9,4 @@ crons = [ "0 0 * * *" ]
 [vars]
 SUPABASE_URL = "https://pbazjkkfzyovldltwrkd.supabase.co"
 SUPABASE_ANON_KEY = "sb_publishable_-7jL1RyGTKvOiSmN5IUK_Q_OCy4eGcZ"
+ARTIFICIAL_ANALYSIS_API_KEY = "aa_cMOrZeGwuDNnbGeWCDZytwrSUxDkWrJX"

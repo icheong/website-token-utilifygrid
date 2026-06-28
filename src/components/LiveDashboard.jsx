@@ -11,10 +11,11 @@ export default function LiveDashboard() {
   useEffect(() => {
     fetchPricing()
       .then(data => {
-        // Group by model and keep only the cheapest price per model
+        // Group by model, exclude embedding/vector/clip/rerank models, keep cheapest per model
         const modelMap = {};
+        const excludePattern = /embed|vector|vec|bge|gte|e5|minilm|mpnet|cross-encoder|rerank|sentence|clip|vit|blip|llava|depth|ocr|transcri|whisper|tts|audio|vision|text2vec/i;
         data
-          .filter(p => p.models && p.providers)
+          .filter(p => p.models && p.providers && !excludePattern.test(p.models.name) && !excludePattern.test(p.models.slug) && p.input_price_per_m > 0)
           .forEach(p => {
             const modelId = p.models.id;
             if (!modelMap[modelId] || p.input_price_per_m < modelMap[modelId].input_price_per_m) {
