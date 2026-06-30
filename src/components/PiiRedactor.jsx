@@ -164,6 +164,10 @@ export default function PiiRedactor({ prompt }) {
     navigator.clipboard.writeText(redactedText);
   };
 
+  const copyRedactedMarkdown = () => {
+    navigator.clipboard.writeText(`\`\`\`markdown\n${redactedText}\n\`\`\``);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">
@@ -286,7 +290,16 @@ export default function PiiRedactor({ prompt }) {
           <div className="flex items-center gap-2 mb-3">
             <span className="material-symbols-outlined text-[18px] text-green-600">check_circle</span>
             <h3 className="font-headline-md text-sm font-bold text-on-surface">Redacted Output</h3>
-            <button onClick={copyRedacted} className="ml-auto text-[10px] text-primary hover:underline">Copy</button>
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={copyRedacted} className="text-[10px] text-primary hover:underline flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px]">content_copy</span>
+                Copy Text
+              </button>
+              <button onClick={copyRedactedMarkdown} className="text-[10px] text-primary hover:underline flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px]">markdown</span>
+                Copy as Markdown
+              </button>
+            </div>
           </div>
           <pre className="p-3 bg-surface border border-outline-variant rounded-lg text-xs text-on-surface font-mono whitespace-pre-wrap break-words max-h-48 overflow-y-auto custom-scrollbar">{redactedText}</pre>
         </div>

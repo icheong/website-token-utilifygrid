@@ -45,6 +45,8 @@ export default function ProvidersPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState('asc');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Filter states
   const [selectedProviders, setSelectedProviders] = useState([]);
@@ -250,6 +252,14 @@ export default function ProvidersPage() {
 
   // Filter models based on all criteria
   const filteredModels = models.filter(model => {
+    // Search query filter
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      if (!model.name.toLowerCase().includes(q)) {
+        return false;
+      }
+    }
+
     // Multi-provider filter (default on)
     if (multiProviderOnly && model.providers.length < 2) {
       return false;
@@ -331,11 +341,22 @@ export default function ProvidersPage() {
     return true;
   });
 
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortOrder('asc');
+    }
+  };
+
   const sorted = [...filteredModels].sort((a, b) => {
-    if (sortBy === 'name') return a.name.localeCompare(b.name);
-    if (sortBy === 'context') return b.context_window - a.context_window;
-    if (sortBy === 'price') return a.minPrice - b.minPrice;
-    return 0;
+    let result = 0;
+    if (sortBy === 'name') result = a.name.localeCompare(b.name);
+    else if (sortBy === 'context') result = a.context_window - b.context_window;
+    else if (sortBy === 'price') result = a.minPrice - b.minPrice;
+    
+    return sortOrder === 'asc' ? result : -result;
   });
 
   const modelIcons = ['neurology', 'hub', 'bolt', 'token', 'shield', 'smart_toy'];
@@ -718,22 +739,22 @@ export default function ProvidersPage() {
           </div>
         </div>
 
-        <div className="flex justify-between items-end mb-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-surface">Model Registry</h1>
             <p className="text-on-surface-variant font-body-md mt-1">{filteredModels.length} of {models.length} models shown</p>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="font-label-mono text-label-mono text-on-surface-variant">Sort by:</span>
-            <select 
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-surface border-outline-variant rounded-lg font-label-mono text-label-mono py-1.5 pr-8 text-primary cursor-pointer text-sm"
-            >
-              <option value="name">Name</option>
-              <option value="context">Context Window</option>
-              <option value="price">Pricing (Low to High)</option>
-            </select>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
+            <div className="relative flex-1 sm:w-64">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+              <input
+                type="text"
+                placeholder="Search models..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-surface border border-outline-variant rounded-lg pl-9 pr-3 py-1.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-primary w-full"
+              />
+            </div>
           </div>
         </div>
 
@@ -741,10 +762,40 @@ export default function ProvidersPage() {
           <table className="w-full border-collapse">
             <thead>
               <tr className="text-left border-b border-outline-variant">
-                <th className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider pl-2 text-xs">Model</th>
-                <th className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-xs">Context</th>
+                <th 
+                  className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider pl-2 text-xs cursor-pointer hover:text-primary transition-colors group select-none"
+                  onClick={() => handleSort('name')}
+                >
+                  <div className="flex items-center gap-1">
+                    Model
+                    <span className={`material-symbols-outlined text-[14px] ${sortBy === 'name' ? 'text-primary opacity-100' : 'opacity-0 group-hover:opacity-50'} transition-all`}>
+                      {sortBy === 'name' && sortOrder === 'desc' ? 'arrow_downward' : 'arrow_upward'}
+                    </span>
+                  </div>
+                </th>
+                <th 
+                  className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-xs cursor-pointer hover:text-primary transition-colors group select-none"
+                  onClick={() => handleSort('context')}
+                >
+                  <div className="flex items-center gap-1">
+                    Context
+                    <span className={`material-symbols-outlined text-[14px] ${sortBy === 'context' ? 'text-primary opacity-100' : 'opacity-0 group-hover:opacity-50'} transition-all`}>
+                      {sortBy === 'context' && sortOrder === 'desc' ? 'arrow_downward' : 'arrow_upward'}
+                    </span>
+                  </div>
+                </th>
                 <th className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-xs">Providers</th>
-                <th className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-right pr-2 text-xs">Cost / 1M</th>
+                <th 
+                  className="pb-3 font-label-mono text-label-mono text-on-surface-variant uppercase tracking-wider text-right pr-2 text-xs cursor-pointer hover:text-primary transition-colors group select-none"
+                  onClick={() => handleSort('price')}
+                >
+                  <div className="flex items-center justify-end gap-1">
+                    <span className={`material-symbols-outlined text-[14px] ${sortBy === 'price' ? 'text-primary opacity-100' : 'opacity-0 group-hover:opacity-50'} transition-all`}>
+                      {sortBy === 'price' && sortOrder === 'desc' ? 'arrow_downward' : 'arrow_upward'}
+                    </span>
+                    Cost / 1M
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-container">

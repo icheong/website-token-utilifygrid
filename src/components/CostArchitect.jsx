@@ -25,6 +25,7 @@ export default function CostArchitect({ prompt }) {
   const [avgInputTokens, setAvgInputTokens] = useState(500);
   const [avgOutputTokens, setAvgOutputTokens] = useState(200);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const { convert, format } = useCurrencyStore();
 
   const promptTokens = prompt ? Math.ceil(prompt.length / 4) : 0;
@@ -33,8 +34,18 @@ export default function CostArchitect({ prompt }) {
   useEffect(() => {
     fetchPricing()
       .then(data => {
+        const modelProviderCounts = {};
+        data.filter(p => p.models && p.providers).forEach(p => {
+          if (!modelProviderCounts[p.models.slug]) {
+            modelProviderCounts[p.models.slug] = new Set();
+          }
+          modelProviderCounts[p.models.slug].add(p.providers.slug);
+        });
+
         const modelMap = {};
         data.filter(p => p.models && p.providers).forEach(p => {
+          if (modelProviderCounts[p.models.slug].size < 2) return;
+          
           const key = `${p.models.slug}|${p.providers.slug}`;
           if (!modelMap[key]) {
             modelMap[key] = {
@@ -75,6 +86,12 @@ export default function CostArchitect({ prompt }) {
     if (!m.contextWindow) return false;
     const utilization = (effectiveInputTokens / m.contextWindow) * 100;
     return utilization > 50;
+  });
+
+  const filteredModels = models.filter(m => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return m.name.toLowerCase().includes(q) || m.provider.toLowerCase().includes(q);
   });
 
   return (
@@ -128,12 +145,30 @@ export default function CostArchitect({ prompt }) {
           <span className="material-symbols-outlined text-[18px] text-primary">model_training</span>
           <h3 className="font-headline-md text-sm font-bold text-on-surface">Select Models to Compare</h3>
           <span className="ml-auto text-[10px] text-on-surface-variant">{selectedModels.length}/4 selected</span>
+          {selectedModels.length > 0 && (
+            <button 
+              onClick={() => setSelectedModels([])}
+              className="text-[10px] text-primary hover:underline ml-2"
+            >
+              Clear all
+            </button>
+          )}
+        </div>
+        <div className="mb-3 relative">
+          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+          <input
+            type="text"
+            placeholder="Search models or providers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
+          />
         </div>
         {loading ? (
           <div className="text-sm text-on-surface-variant animate-pulse">Loading models...</div>
         ) : (
           <div className="max-h-48 overflow-y-auto custom-scrollbar space-y-1">
-            {models.slice(0, 50).map((m, i) => {
+            {filteredModels.slice(0, 50).map((m, i) => {
               const isSelected = selectedModels.some(sm => sm.slug === m.slug && sm.providerSlug === m.providerSlug);
               const utilization = m.contextWindow ? (effectiveInputTokens / m.contextWindow) * 100 : null;
               const status = utilization !== null ? getContextStatus(utilization) : null;
@@ -173,19 +208,21 @@ export default function CostArchitect({ prompt }) {
 
       {selectedModels.length > 0 && (
         <>
-          {hasWarnings && (
-            <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-[18px] text-orange-500">monitoring</span>
-                <h3 className="font-headline-md text-sm font-bold text-on-surface">Context Window Analysis</h3>
-                <span className="text-[10px] text-on-surface-variant ml-auto">Input: {effectiveInputTokens.toLocaleString()} tokens</span>
-              </div>
-              <div className="space-y-3">
-                {selectedModels.map((m) => {
-                  if (!m.contextWindow) return null;
-                  const utilization = (effectiveInputTokens / m.contextWindow) * 100;
-                  const status = getContextStatus(utilization);
-                  const remaining = m.contextWindow - effectiveInputTokens;
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <span className={`material-symbols-outlined text-[18px] ${hasWarnings ? 'text-orange-500' : 'text-primary'}`}>monitoring</span>
+              <h3 className="font-headline-md text-sm font-bold text-on-surface">Context Window Analysis</h3>
+              <span className="text-[10px] text-on-surface-variant ml-auto">
+                Input: {effectiveInputTokens.toLocaleString()} tokens 
+                <span className="opacity-70 ml-1">({promptTokens > 0 ? 'from prompt' : 'from Avg Input Tokens'})</span>
+              </span>
+            </div>
+            <div className="space-y-3">
+              {selectedModels.map((m) => {
+                if (!m.contextWindow) return null;
+                const utilization = (effectiveInputTokens / m.contextWindow) * 100;
+                const status = getContextStatus(utilization);
+                const remaining = m.contextWindow - effectiveInputTokens;
                   return (
                     <div key={`${m.slug}-${m.providerSlug}`} className={`p-3 rounded-lg border ${status.border} bg-surface`}>
                       <div className="flex items-center justify-between mb-2">
@@ -210,7 +247,6 @@ export default function CostArchitect({ prompt }) {
                 })}
               </div>
             </div>
-          )}
 
           <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
