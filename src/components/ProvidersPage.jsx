@@ -109,6 +109,16 @@ export default function ProvidersPage() {
             latency_tps: item.latency_tps,
             daily_limit: item.daily_limit,
           });
+
+          // Store full provider-specific pricing for expand panel
+          if (item.providers) {
+            modelMap[m.slug].providerPricing = modelMap[m.slug].providerPricing || [];
+            modelMap[m.slug].providerPricing.push({
+              provider: item.providers,
+              input_price_per_m: item.input_price_per_m,
+              output_price_per_m: item.output_price_per_m,
+            });
+          }
           
           // Track features
           if (item.prompt_caching) modelMap[m.slug].hasPromptCaching = true;
@@ -880,44 +890,43 @@ export default function ProvidersPage() {
                   {expandedModel === model.id && (
                     <tr>
                       <td colSpan="4" className="px-4 py-4 bg-surface-container-low">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Max Output</div>
-                            <div className="font-metric-display text-lg text-on-surface">{model.max_output?.toLocaleString() || 'N/A'}</div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Max Throughput</div>
-                            <div className="font-metric-display text-lg text-on-surface">{model.maxTps} TPS</div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Prompt Caching</div>
-                            <div className={`font-metric-display text-lg ${model.hasPromptCaching ? 'text-success' : 'text-error'}`}>
-                              {model.hasPromptCaching ? 'Supported' : 'Not Supported'}
+                        <div className="flex flex-col gap-3">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div className="p-3 bg-surface rounded-lg border border-outline-variant">
+                              <div className="font-label-mono text-[10px] text-on-surface-variant uppercase mb-1">Max Output</div>
+                              <div className="font-metric-display text-lg text-on-surface">{model.max_output?.toLocaleString() || 'N/A'}</div>
+                            </div>
+                            <div className="p-3 bg-surface rounded-lg border border-outline-variant">
+                              <div className="font-label-mono text-[10px] text-on-surface-variant uppercase mb-1">Max Throughput</div>
+                              <div className="font-metric-display text-lg text-on-surface">{model.maxTps} TPS</div>
+                            </div>
+                            <div className="p-3 bg-surface rounded-lg border border-outline-variant">
+                              <div className="font-label-mono text-[10px] text-on-surface-variant uppercase mb-1">Prompt Caching</div>
+                              <div className={`font-metric-display text-lg ${model.hasPromptCaching ? 'text-success' : 'text-on-surface-variant'}`}>
+                                {model.hasPromptCaching ? 'Supported' : 'Not Supported'}
+                              </div>
+                            </div>
+                            <div className="p-3 bg-surface rounded-lg border border-outline-variant">
+                              <div className="font-label-mono text-[10px] text-on-surface-variant uppercase mb-1">Reasoning</div>
+                              <div className={`font-metric-display text-lg ${model.hasReasoningPricing ? 'text-success' : 'text-on-surface-variant'}`}>
+                                {model.hasReasoningPricing ? 'Available' : 'Not Available'}
+                              </div>
                             </div>
                           </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Reasoning Pricing</div>
-                            <div className={`font-metric-display text-lg ${model.hasReasoningPricing ? 'text-success' : 'text-error'}`}>
-                              {model.hasReasoningPricing ? 'Available' : 'Not Available'}
+                          {/* Per-provider price breakdown */}
+                          <div>
+                            <h4 className="font-label-mono text-[10px] text-on-surface-variant uppercase tracking-wider mb-2">Provider Pricing</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                              {(model.providerPricing || []).map((pp) => (
+                                <div key={pp.provider.id} className="flex items-center justify-between p-2.5 bg-surface rounded-lg border border-outline-variant">
+                                  <span className="font-body-sm text-sm text-on-surface font-medium">{pp.provider.name}</span>
+                                  <div className="flex items-center gap-3 text-sm">
+                                    <span className="text-on-surface-variant">In: <span className="font-mono text-on-surface">{format(convert(pp.input_price_per_m || 0))}</span></span>
+                                    <span className="text-on-surface-variant">Out: <span className="font-mono text-on-surface">{format(convert(pp.output_price_per_m || 0))}</span></span>
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Daily Limit</div>
-                            <div className="font-metric-display text-lg text-on-surface">
-                              {model.hasUnlimited ? 'Unlimited' : model.hasLimited ? 'Limited' : 'N/A'}
-                            </div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Input Price</div>
-                            <div className="font-metric-display text-lg text-primary">{format(convert(model.minPrice))}</div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Output Price</div>
-                            <div className="font-metric-display text-lg text-primary">{format(convert(model.maxPrice))}</div>
-                          </div>
-                          <div className="p-3 bg-surface rounded-lg border border-outline-variant">
-                            <div className="font-label-mono text-xs text-on-surface-variant uppercase mb-1">Providers</div>
-                            <div className="font-metric-display text-lg text-on-surface">{model.providers.length}</div>
                           </div>
                         </div>
                       </td>

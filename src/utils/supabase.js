@@ -39,7 +39,7 @@ export async function fetchPricing() {
     .select(`
       *,
       models (id, slug, name, context_window, max_output, category),
-      providers (id, slug, name, affiliate_url, discount_promo)
+      providers (id, slug, name, affiliate_url, discount_promo, avg_ttft_ms, avg_throughput_tps, p50_latency, p99_latency, uptime_30s, concurrency_limit, rate_limits, zero_data_retention, is_moderated, batch_discount)
     `);
   if (error) throw error;
   return data || [];
@@ -101,7 +101,10 @@ export async function fetchComparison(modelSlug, providerASlug, providerBSlug) {
 
   const { data: pricing, error: pricingError } = await supabase
     .from('provider_pricing')
-    .select('*')
+    .select(`
+      *,
+      providers (id, slug, name, affiliate_url, discount_promo)
+    `)
     .eq('model_id', model.id)
     .in('provider_id', [providerA.id, providerB.id]);
   if (pricingError) throw pricingError;

@@ -50,32 +50,52 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
     singleA: 0, monthlyA: 0,
     singleB: 0, monthlyB: 0,
     difference: 0,
-    winner: 'A'
+    winner: 'A',
+    batchA: null, batchB: null,
   });
 
   // 2. Perform Cost Arithmetic
   useEffect(() => {
     const rateA = {
-      input: (pricingA?.input_price_per_m || 0) / 1000000,
-      output: (pricingA?.output_price_per_m || 0) / 1000000
+      input: (pricingA?.input_price_per_m || pricingA?.input_cost_per_1m || 0) / 1000000,
+      output: (pricingA?.output_price_per_m || pricingA?.output_cost_per_1m || 0) / 1000000
     };
 
     const rateB = {
-      input: (pricingB?.input_price_per_m || 0) / 1000000,
-      output: (pricingB?.output_price_per_m || 0) / 1000000
+      input: (pricingB?.input_price_per_m || pricingB?.input_cost_per_1m || 0) / 1000000,
+      output: (pricingB?.output_price_per_m || pricingB?.output_cost_per_1m || 0) / 1000000
     };
 
-    // Run core calculations
-    const singleA = (inputVal * rateA.input) + (outputVal * rateA.output);
+    // Cache-adjusted rates (assume 50% cache hit rate for estimation)
+    const CACHE_HIT_RATE = 0.5;
+    const cacheA = {
+      input: pricingA?.cache_hit_discount_rate != null
+        ? rateA.input * (1 - pricingA.cache_hit_discount_rate) * CACHE_HIT_RATE + rateA.input * (1 - CACHE_HIT_RATE)
+        : rateA.input,
+      writeCost: pricingA?.cache_write_cost_per_1m ? (pricingA.cache_write_cost_per_1m / 1000000) * CACHE_HIT_RATE : 0,
+    };
+    const cacheB = {
+      input: pricingB?.cache_hit_discount_rate != null
+        ? rateB.input * (1 - pricingB.cache_hit_discount_rate) * CACHE_HIT_RATE + rateB.input * (1 - CACHE_HIT_RATE)
+        : rateB.input,
+      writeCost: pricingB?.cache_write_cost_per_1m ? (pricingB.cache_write_cost_per_1m / 1000000) * CACHE_HIT_RATE : 0,
+    };
+
+    // Run core calculations (with cache adjustment)
+    const singleA = ((inputVal * cacheA.input) + (outputVal * rateA.output)) + (inputVal * cacheA.writeCost);
     const monthlyA = singleA * volumeVal;
 
-    const singleB = (inputVal * rateB.input) + (outputVal * rateB.output);
+    const singleB = ((inputVal * cacheB.input) + (outputVal * rateB.output)) + (inputVal * cacheB.writeCost);
     const monthlyB = singleB * volumeVal;
+
+    // Batch-adjusted monthly (if batch discount available)
+    const batchA = pricingA?.batch_discount_rate ? monthlyA * (1 - pricingA.batch_discount_rate) : null;
+    const batchB = pricingB?.batch_discount_rate ? monthlyB * (1 - pricingB.batch_discount_rate) : null;
 
     const difference = Math.abs(monthlyA - monthlyB);
     const winner = monthlyA < monthlyB ? 'A' : 'B';
 
-    setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner });
+    setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner, batchA, batchB });
   }, [inputVal, outputVal, volumeVal, pricingA, pricingB]);
 
   // 3. Format cost based on selected unit
@@ -251,12 +271,36 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
                 <p className="font-metric-display text-headline-md text-on-surface">
                   {format(convert(costs.monthlyA))}
                 </p>
+                {costs.batchA != null && (
+                  <p className="text-xs text-success mt-1 font-medium">With batch: {format(convert(costs.batchA))}</p>
+                )}
                 <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
                   winner === 'A' ? 'bg-emerald-300' : 'bg-surface-container-high'
                 }`}>
                   <div className={`h-full ${winner === 'A' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`} 
                        style={{width: winner === 'A' ? '60%' : '100%'}}></div>
                 </div>
+              </div>
+              {/* Provider-specific details */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs pt-2 border-t border-outline-variant/20">
+                {pricingA?.avg_ttft_ms != null && (
+                  <div><span className="text-on-surface-variant">TTFT:</span> <span className="font-mono text-on-surface">{pricingA.avg_ttft_ms}ms</span></div>
+                )}
+                {(pricingA?.avg_throughput_tps || pricingA?.latency_tps) && (
+                  <div><span className="text-on-surface-variant">Throughput:</span> <span className="font-mono text-on-surface">{pricingA?.avg_throughput_tps || pricingA?.latency_tps} TPS</span></div>
+                )}
+                {pricingA?.cache_hit_discount_rate != null && (
+                  <div><span className="text-on-surface-variant">Cache hit:</span> <span className="font-mono text-on-surface">{(pricingA.cache_hit_discount_rate * 100).toFixed(0)}% off</span></div>
+                )}
+                {pricingA?.prompt_caching_type && (
+                  <div><span className="text-on-surface-variant">Caching:</span> <span className="font-mono text-on-surface">{pricingA.prompt_caching_type}</span></div>
+                )}
+                {pricingA?.default_rpm_limit && (
+                  <div><span className="text-on-surface-variant">RPM:</span> <span className="font-mono text-on-surface">{pricingA.default_rpm_limit.toLocaleString()}</span></div>
+                )}
+                {pricingA?.quantization_level && (
+                  <div><span className="text-on-surface-variant">Quant:</span> <span className="font-mono text-on-surface uppercase">{pricingA.quantization_level}</span></div>
+                )}
               </div>
             </div>
           </div>
@@ -300,12 +344,36 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
                 <p className="font-metric-display text-headline-md text-on-surface">
                   {format(convert(costs.monthlyB))}
                 </p>
+                {costs.batchB != null && (
+                  <p className="text-xs text-success mt-1 font-medium">With batch: {format(convert(costs.batchB))}</p>
+                )}
                 <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
                   winner === 'B' ? 'bg-emerald-300' : 'bg-surface-container-high'
                 }`}>
                   <div className={`h-full ${winner === 'B' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`}
                        style={{width: winner === 'B' ? '60%' : '100%'}}></div>
                 </div>
+              </div>
+              {/* Provider-specific details */}
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs pt-2 border-t border-outline-variant/20">
+                {pricingB?.avg_ttft_ms != null && (
+                  <div><span className="text-on-surface-variant">TTFT:</span> <span className="font-mono text-on-surface">{pricingB.avg_ttft_ms}ms</span></div>
+                )}
+                {(pricingB?.avg_throughput_tps || pricingB?.latency_tps) && (
+                  <div><span className="text-on-surface-variant">Throughput:</span> <span className="font-mono text-on-surface">{pricingB?.avg_throughput_tps || pricingB?.latency_tps} TPS</span></div>
+                )}
+                {pricingB?.cache_hit_discount_rate != null && (
+                  <div><span className="text-on-surface-variant">Cache hit:</span> <span className="font-mono text-on-surface">{(pricingB.cache_hit_discount_rate * 100).toFixed(0)}% off</span></div>
+                )}
+                {pricingB?.prompt_caching_type && (
+                  <div><span className="text-on-surface-variant">Caching:</span> <span className="font-mono text-on-surface">{pricingB.prompt_caching_type}</span></div>
+                )}
+                {pricingB?.default_rpm_limit && (
+                  <div><span className="text-on-surface-variant">RPM:</span> <span className="font-mono text-on-surface">{pricingB.default_rpm_limit.toLocaleString()}</span></div>
+                )}
+                {pricingB?.quantization_level && (
+                  <div><span className="text-on-surface-variant">Quant:</span> <span className="font-mono text-on-surface uppercase">{pricingB.quantization_level}</span></div>
+                )}
               </div>
             </div>
           </div>
