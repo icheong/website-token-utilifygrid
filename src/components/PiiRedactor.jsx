@@ -192,7 +192,13 @@ export default function PiiRedactor({ prompt }) {
         {showSettings && (
           <div className="mt-4 p-4 bg-surface border border-outline-variant rounded-lg space-y-4">
             <div>
-              <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider mb-2">PII Types to Detect</div>
+              <div className="flex items-center mb-2">
+                <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">PII Types to Detect</div>
+                <span className="relative group ml-1">
+                  <span className="material-symbols-outlined text-[12px] text-on-surface-variant/50 cursor-help">info</span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 p-2 bg-surface-container-high border border-outline-variant rounded-lg text-[10px] text-on-surface-variant leading-tight opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">Choose which types of personally identifiable information to scan for. Toggle off any types you don't need.</span>
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {PII_TYPES.map(type => (
                   <button key={type.id} onClick={() => toggleType(type.id)}
@@ -209,7 +215,13 @@ export default function PiiRedactor({ prompt }) {
             </div>
 
             <div>
-              <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Replacement Mode</div>
+              <div className="flex items-center mb-2">
+                <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">Replacement Mode</div>
+                <span className="relative group ml-1">
+                  <span className="material-symbols-outlined text-[12px] text-on-surface-variant/50 cursor-help">info</span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 p-2 bg-surface-container-high border border-outline-variant rounded-lg text-[10px] text-on-surface-variant leading-tight opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">Controls how detected PII is replaced. Use "Mock" for realistic fake data when testing prompts.</span>
+                </span>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {REPLACEMENT_MODES.map(mode => (
                   <button key={mode.id} onClick={() => setReplacementMode(mode.id)}
@@ -236,7 +248,13 @@ export default function PiiRedactor({ prompt }) {
             </div>
 
             <div>
-              <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider mb-2">Custom Patterns</div>
+              <div className="flex items-center mb-2">
+                <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">Custom Patterns</div>
+                <span className="relative group ml-1">
+                  <span className="material-symbols-outlined text-[12px] text-on-surface-variant/50 cursor-help">info</span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 p-2 bg-surface-container-high border border-outline-variant rounded-lg text-[10px] text-on-surface-variant leading-tight opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">Add your own regex patterns to detect organization-specific identifiers like employee IDs or project codes.</span>
+                </span>
+              </div>
               <div className="flex gap-2">
                 <input type="text" value={newPatternName} onChange={(e) => setNewPatternName(e.target.value)}
                   placeholder="Name" className="w-24 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs text-on-surface focus:outline-none focus:border-primary" />

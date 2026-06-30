@@ -75,15 +75,19 @@ export default function PromptOptimizer({ prompt }) {
 
   const [cotSteps, setCotSteps] = useState([]);
   const [cotCustomStep, setCotCustomStep] = useState('');
-  const [showCoT, setShowCoT] = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
 
   useEffect(() => {
     setOptimized('');
     setTips([]);
     setHasAnalyzed(false);
-    setCotSteps([]);
-    setShowCoT(false);
   }, [prompt]);
+
+  useEffect(() => {
+    const model = TARGET_MODELS.find(m => m.id === targetModel);
+    const template = COT_TEMPLATES[model?.cotStyle || 'balanced'];
+    setCotSteps(template.steps.map((s, i) => ({ id: i, text: s })));
+  }, [targetModel]);
 
   const addCustomRule = () => {
     if (!newRuleName.trim() || !newRuleSuggestion.trim()) return;
@@ -214,39 +218,53 @@ export default function PromptOptimizer({ prompt }) {
   };
 
   const injectCoT = () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || cotSteps.length === 0) return;
 
     const model = TARGET_MODELS.find(m => m.id === targetModel);
     const template = COT_TEMPLATES[model?.cotStyle || 'balanced'];
 
     let result = `${prompt}\n\n${template.prefix}\n\n`;
-    template.steps.forEach((step, i) => {
-      result += `${i + 1}. ${step}\n`;
+    cotSteps.forEach((step, i) => {
+      result += `${i + 1}. ${step.text}\n`;
     });
-
-    if (cotSteps.length > 0) {
-      result += '\nAdditional reasoning steps:\n';
-      cotSteps.forEach((step, i) => {
-        result += `${template.steps.length + i + 1}. ${step}\n`;
-      });
-    }
-
     result += `\n${template.suffix}`;
 
     setOptimized(result);
-    setCotSteps(template.steps.map((s, i) => ({ id: i, text: s, builtIn: true })));
-    setShowCoT(true);
     setHasAnalyzed(true);
   };
 
   const addCustomCoTStep = () => {
     if (!cotCustomStep.trim()) return;
-    setCotSteps(prev => [...prev, { id: Date.now(), text: cotCustomStep, builtIn: false }]);
+    setCotSteps(prev => [...prev, { id: Date.now(), text: cotCustomStep }]);
     setCotCustomStep('');
   };
 
   const removeCoTStep = (id) => {
     setCotSteps(prev => prev.filter(s => s.id !== id));
+  };
+
+  const updateCoTStep = (id, newText) => {
+    setCotSteps(prev => prev.map(s => s.id === id ? { ...s, text: newText } : s));
+  };
+
+  const handleDragStart = (index) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (targetIndex) => {
+    if (dragIndex === null || dragIndex === targetIndex) {
+      setDragIndex(null);
+      return;
+    }
+    const reordered = [...cotSteps];
+    const [moved] = reordered.splice(dragIndex, 1);
+    reordered.splice(targetIndex, 0, moved);
+    setCotSteps(reordered);
+    setDragIndex(null);
   };
 
   const copyOptimized = () => {
@@ -265,11 +283,6 @@ export default function PromptOptimizer({ prompt }) {
           <button onClick={analyze} disabled={!prompt.trim()}
             className="px-4 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
             Analyze & Optimize
-          </button>
-          <button onClick={injectCoT} disabled={!prompt.trim()}
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[14px]">psychology</span>
-            Inject CoT
           </button>
           <button onClick={() => setShowSettings(!showSettings)}
             className="px-3 py-2 bg-surface-container text-on-surface-variant rounded-lg text-xs font-medium hover:bg-surface-container-high transition-all flex items-center gap-1">
@@ -348,8 +361,12 @@ export default function PromptOptimizer({ prompt }) {
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-[14px] text-primary">format_list_numbered</span>
                 <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">Few-Shot Generator</div>
+                <span className="relative group ml-1">
+                  <span className="material-symbols-outlined text-[12px] text-on-surface-variant/50 cursor-help">info</span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 p-2 bg-surface-container-high border border-outline-variant rounded-lg text-[10px] text-on-surface-variant leading-tight opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">Provide example input/output pairs so the model learns the exact pattern and style you want it to replicate.</span>
+                </span>
               </div>
-              <p className="text-[10px] text-on-surface-variant mb-3">Add up to 3 input/output pairs to format into a structured training block.</p>
+              <p className="text-[10px] text-on-surface-variant mb-3">Add up to 3 input/output pairs. The model will learn from these examples and follow the same format.</p>
 
               <div className="flex gap-2 mb-3">
                 {['system-user', 'delimited'].map(mode => (
@@ -385,44 +402,63 @@ export default function PromptOptimizer({ prompt }) {
                 Generate Few-Shot Block
               </button>
             </div>
+
+            <div className="border-t border-outline-variant pt-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="material-symbols-outlined text-[14px] text-purple-600">psychology</span>
+                <div className="text-[10px] font-label-mono text-on-surface-variant uppercase tracking-wider">Chain-of-Thought Steps</div>
+                <span className="relative group ml-1">
+                  <span className="material-symbols-outlined text-[12px] text-on-surface-variant/50 cursor-help">info</span>
+                  <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 p-2 bg-surface-container-high border border-outline-variant rounded-lg text-[10px] text-on-surface-variant leading-tight opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-10">Guides the model to reason step-by-step before answering, improving accuracy on complex or multi-step problems.</span>
+                </span>
+              </div>
+              <p className="text-[10px] text-on-surface-variant mb-3">Edit, reorder, or remove steps. The model will follow this reasoning chain before producing its answer.</p>
+
+              <div className="space-y-2 mb-3">
+                {cotSteps.map((step, i) => (
+                  <div
+                    key={step.id}
+                    draggable={true}
+                    onDragStart={() => handleDragStart(i)}
+                    onDragOver={handleDragOver}
+                    onDrop={() => handleDrop(i)}
+                    className={`flex items-start gap-2 p-2 rounded-lg cursor-grab bg-purple-500/5 border border-purple-500/10 ${dragIndex === i ? 'opacity-50' : ''}`}
+                  >
+                    <span className="material-symbols-outlined text-[12px] text-purple-600/50 mt-1 shrink-0">drag_indicator</span>
+                    <span className="text-[10px] font-label-mono text-purple-600 mt-0.5 shrink-0">{i + 1}.</span>
+                    <input
+                      type="text"
+                      value={step.text}
+                      onChange={(e) => updateCoTStep(step.id, e.target.value)}
+                      className="flex-1 bg-transparent text-xs text-on-surface focus:outline-none focus:border-b focus:border-purple-600/30"
+                    />
+                    <button onClick={() => removeCoTStep(step.id)} className="text-on-surface-variant hover:text-red-500 shrink-0">
+                      <span className="material-symbols-outlined text-[12px]">close</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex gap-2 mb-3">
+                <input type="text" value={cotCustomStep} onChange={(e) => setCotCustomStep(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addCustomCoTStep()}
+                  placeholder="Add custom reasoning step..."
+                  className="flex-1 bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary" />
+                <button onClick={addCustomCoTStep}
+                  className="px-3 py-2 bg-surface-container text-on-surface-variant rounded-lg text-xs font-medium hover:bg-surface-container-high transition-all">
+                  Add Step
+                </button>
+              </div>
+
+              <button onClick={injectCoT} disabled={!prompt.trim() || cotSteps.length === 0}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[14px]">psychology</span>
+                Inject CoT
+              </button>
+            </div>
           </div>
         )}
       </div>
-
-      {showCoT && (
-        <div className="bg-surface-container-lowest border border-purple-500/20 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <span className="material-symbols-outlined text-[18px] text-purple-600">psychology</span>
-            <h3 className="font-headline-md text-sm font-bold text-on-surface">Chain-of-Thought Steps</h3>
-            <span className="ml-auto text-[10px] text-on-surface-variant">Optimized for {TARGET_MODELS.find(m => m.id === targetModel)?.name || 'Any'}</span>
-          </div>
-
-          <div className="space-y-2 mb-3">
-            {cotSteps.map((step, i) => (
-              <div key={step.id} className={`flex items-start gap-2 p-2 rounded-lg ${step.builtIn ? 'bg-purple-500/5 border border-purple-500/10' : 'bg-surface border border-outline-variant'}`}>
-                <span className="text-[10px] font-label-mono text-purple-600 mt-0.5 shrink-0">{i + 1}.</span>
-                <span className="text-xs text-on-surface flex-1">{step.text}</span>
-                {!step.builtIn && (
-                  <button onClick={() => removeCoTStep(step.id)} className="text-on-surface-variant hover:text-red-500 shrink-0">
-                    <span className="material-symbols-outlined text-[12px]">close</span>
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="flex gap-2">
-            <input type="text" value={cotCustomStep} onChange={(e) => setCotCustomStep(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && addCustomCoTStep()}
-              placeholder="Add custom reasoning step..."
-              className="flex-1 bg-surface border border-outline-variant rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-primary" />
-            <button onClick={addCustomCoTStep}
-              className="px-3 py-2 bg-surface-container text-on-surface-variant rounded-lg text-xs font-medium hover:bg-surface-container-high transition-all">
-              Add Step
-            </button>
-          </div>
-        </div>
-      )}
 
       {tips.length > 0 && (
         <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">

@@ -6,6 +6,7 @@ export default function ModelBenchmark() {
   const [selected, setSelected] = useState([]);
   const [sortKey, setSortKey] = useState('input');
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchPricing()
@@ -47,6 +48,12 @@ export default function ModelBenchmark() {
     return 0;
   });
 
+  const filteredModels = sorted.filter(m => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return m.name.toLowerCase().includes(q) || m.provider.toLowerCase().includes(q);
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5">
@@ -67,11 +74,22 @@ export default function ModelBenchmark() {
           ))}
         </div>
 
+        <div className="mb-3 relative">
+          <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+          <input
+            type="text"
+            placeholder="Search models or providers..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-1.5 text-xs text-on-surface placeholder:text-outline focus:outline-none focus:border-primary"
+          />
+        </div>
+
         {loading ? (
           <div className="text-sm text-on-surface-variant animate-pulse">Loading models...</div>
         ) : (
           <div className="max-h-64 overflow-y-auto custom-scrollbar space-y-1">
-            {sorted.slice(0, 40).map((m, i) => {
+            {filteredModels.slice(0, 40).map((m, i) => {
               const isSelected = selected.some(s => s.name === m.name && s.provider === m.provider);
               return (
                 <button key={`${m.name}-${m.provider}-${i}`} onClick={() => toggle(m)}
