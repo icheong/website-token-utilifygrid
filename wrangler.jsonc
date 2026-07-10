@@ -6,11 +6,8 @@
     "global_fetch_strictly_public",
     "nodejs_compat"
   ],
+  "pages_build_output_dir": "./dist",
   "observability": {
     "enabled": true
-  },
-  "assets": {
-    "directory": "./dist/client",
-    "binding": "ASSETS"
   }
 }
