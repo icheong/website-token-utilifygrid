@@ -121,106 +121,88 @@ import MainLayout from '../layouts/MainLayout.astro';
           Data Sources
         </h3>
         <p class="font-body-md text-body-md text-on-surface-variant mb-4">
-          Pricing data is sourced directly from provider APIs and aggregated endpoints. Prices are synced regularly and verified against official documentation.
+          Pricing data is sourced from official provider APIs and aggregated endpoints. Prices are synced regularly and verified against published rate cards.
         </p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          <a href="https://openai.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">OA</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">OpenAI</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">openai.com</p>
-            </div>
-          </a>
-          <a href="https://anthropic.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">An</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Anthropic</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">anthropic.com</p>
-            </div>
-          </a>
-          <a href="https://ai.google.dev" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">G</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Google</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">ai.google.dev</p>
-            </div>
-          </a>
-          <a href="https://deepinfra.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">DI</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">DeepInfra</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">deepinfra.com</p>
-            </div>
-          </a>
-          <a href="https://deepseek.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">DS</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">DeepSeek</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">deepseek.com</p>
-            </div>
-          </a>
-          <a href="https://mistral.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">Mi</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Mistral</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">mistral.ai</p>
-            </div>
-          </a>
-          <a href="https://llama.meta.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">Me</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Meta</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">llama.meta.com</p>
-            </div>
-          </a>
-          <a href="https://together.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">TA</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Together AI</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">together.ai</p>
-            </div>
-          </a>
-          <a href="https://groq.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">Gr</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Groq</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">groq.com</p>
-            </div>
-          </a>
-          <a href="https://fireworks.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">FW</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Fireworks AI</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">fireworks.ai</p>
-            </div>
-          </a>
-          <a href="https://nvidia.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">Nv</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">NVIDIA</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">nvidia.com</p>
-            </div>
-          </a>
-          <a href="https://microsoft.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">MS</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Microsoft</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">microsoft.com</p>
-            </div>
-          </a>
-          <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">OR</div>
-            <div>
+        <div class="divide-y divide-outline-variant">
+          <a href="https://openrouter.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">OR</div>
+            <div class="flex-1 min-w-0">
               <p class="font-body-md text-body-md text-on-surface font-medium">OpenRouter</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">openrouter.ai</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">openrouter.ai/api/v1/models</p>
             </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">OpenAI, Anthropic, Google, Meta, DeepSeek, Cohere, NVIDIA, Microsoft</span>
           </a>
-          <a href="https://artificialanalysis.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 p-3 rounded-lg border border-outline-variant/50 hover:border-primary/50 hover:bg-surface-container-low transition-colors">
-            <div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs">AA</div>
-            <div>
-              <p class="font-body-md text-body-md text-on-surface font-medium">Artificial Analysis</p>
-              <p class="font-label-mono text-label-mono text-on-surface-variant">artificialanalysis.ai</p>
+          <a href="https://deepinfra.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">DI</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">DeepInfra</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.deepinfra.com/v1/openai/models</p>
             </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Llama, Mistral, Qwen, Gemini</span>
+          </a>
+          <a href="https://mistral.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">Mi</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Mistral</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.mistral.ai/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Mistral, Codestral, Pixtral</span>
+          </a>
+          <a href="https://groq.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">Gr</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Groq</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.groq.com/openai/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Llama, Gemma, Mixtral</span>
+          </a>
+          <a href="https://fireworks.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">FW</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Fireworks AI</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.fireworks.ai/inference/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Llama, Mixtral, Qwen</span>
+          </a>
+          <a href="https://cerebras.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">CB</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Cerebras</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.cerebras.ai/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Llama, Qwen, Gemma (ultra-fast)</span>
+          </a>
+          <a href="https://sambanova.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">SN</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">SambaNova</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">api.sambanova.ai/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">DeepSeek, Llama, Qwen (RDU)</span>
+          </a>
+          <a href="https://nvidia.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">NV</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">NVIDIA NIM</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">integrate.api.nvidia.com/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">DeepSeek, Llama, Nemotron</span>
+          </a>
+          <a href="https://huggingface.co" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">HF</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Hugging Face</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">router.huggingface.co/v1/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Llama, Mistral, Qwen, Gemma</span>
+          </a>
+          <a href="https://artificialanalysis.ai" target="_blank" rel="noopener noreferrer" class="flex items-center gap-4 py-4 hover:bg-surface-container-low transition-colors -mx-2 px-2 rounded">
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center font-bold text-on-surface-variant text-xs flex-shrink-0">AA</div>
+            <div class="flex-1 min-w-0">
+              <p class="font-body-md text-body-md text-on-surface font-medium">Artificial Analysis</p>
+              <p class="font-label-mono text-label-mono text-on-surface-variant truncate">artificialanalysis.ai/api/v2/language/models</p>
+            </div>
+            <span class="font-label-xs text-label-xs text-on-surface-variant hidden sm:block">Cross-provider benchmarks & pricing</span>
           </a>
         </div>
       </section>

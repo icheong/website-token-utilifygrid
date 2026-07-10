@@ -1,6 +1,6 @@
 // src/pages/api/sync-pricing.js
 // Multi-source pricing sync — bulk-optimized for Cloudflare's subrequest limit
-// Sources: OpenRouter, OpenAI, Anthropic, Mistral, DeepInfra, Together AI, Groq, Fireworks, Artificial Analysis
+// Sources: OpenRouter, DeepInfra, Mistral, Groq, Fireworks, Cerebras, SambaNova, NVIDIA NIM, Cohere, Google Gemini, Hugging Face, Artificial Analysis
 
 export const prerender = false;
 
@@ -21,6 +21,10 @@ const PROVIDER_INFO = {
   'together-ai': { name: 'Together AI', url: 'https://together.ai' },
   groq: { name: 'Groq', url: 'https://groq.com' },
   fireworks: { name: 'Fireworks AI', url: 'https://fireworks.ai' },
+  cerebras: { name: 'Cerebras', url: 'https://cerebras.ai' },
+  sambanova: { name: 'SambaNova', url: 'https://sambanova.ai' },
+  nvidia: { name: 'NVIDIA NIM', url: 'https://nvidia.com' },
+  'huggingface': { name: 'Hugging Face', url: 'https://huggingface.co' },
   'artificial-analysis': { name: 'Artificial Analysis', url: 'https://artificialanalysis.ai' },
 };
 
@@ -72,6 +76,30 @@ const PROVIDER_META = {
     uptime_30s: 0.9985, concurrency_limit: 50,
     rate_limits: { free: { rpm: 10, tpm: 10000 }, paid: { rpm: 100, tpm: 500000 }, enterprise: { rpm: 500, tpm: 5000000 } },
     zero_data_retention: false, is_moderated: true, batch_discount: 0,
+  },
+  cerebras: {
+    avg_ttft_ms: 150, avg_throughput_tps: 2600, p50_latency: 300, p99_latency: 800,
+    uptime_30s: 0.9995, concurrency_limit: 30,
+    rate_limits: { free: { rpm: 30, tpm: 100000 }, pro: { rpm: 100, tpm: 400000 }, enterprise: { rpm: 500, tpm: 2000000 } },
+    zero_data_retention: false, is_moderated: false, batch_discount: 0,
+  },
+  sambanova: {
+    avg_ttft_ms: 180, avg_throughput_tps: 2000, p50_latency: 350, p99_latency: 900,
+    uptime_30s: 0.9990, concurrency_limit: 20,
+    rate_limits: { free: { rpm: 20, tpm: 60000 }, paid: { rpm: 200, tpm: 1000000 }, enterprise: { rpm: 1000, tpm: 5000000 } },
+    zero_data_retention: false, is_moderated: false, batch_discount: 0,
+  },
+  nvidia: {
+    avg_ttft_ms: 400, avg_throughput_tps: 90, p50_latency: 1000, p99_latency: 4000,
+    uptime_30s: 0.9995, concurrency_limit: 40,
+    rate_limits: { free: { rpm: 40, tpm: 50000 }, paid: { rpm: 500, tpm: 500000 }, enterprise: { rpm: 2000, tpm: 5000000 } },
+    zero_data_retention: false, is_moderated: false, batch_discount: 0,
+  },
+  huggingface: {
+    avg_ttft_ms: 500, avg_throughput_tps: 80, p50_latency: 1200, p99_latency: 5000,
+    uptime_30s: 0.9990, concurrency_limit: 50,
+    rate_limits: { free: { rpm: 20, tpm: 30000 }, pro: { rpm: 200, tpm: 500000 }, enterprise: { rpm: 1000, tpm: 5000000 } },
+    zero_data_retention: false, is_moderated: false, batch_discount: 0,
   },
 };
 
@@ -318,6 +346,111 @@ function parseFireworksModels(data) {
   }));
 }
 
+// Cerebras: OpenAI-compatible, pricing per 1M tokens
+function parseCerebrasModels(data) {
+  if (!data?.data) return [];
+  const CEREBRAS_PRICES = {
+    'llama-3.3-70b': [0.60, 0.60],
+    'llama-3.1-8b': [0.10, 0.10],
+    'llama-3.1-70b': [0.60, 0.60],
+    'llama-3.1-405b': [2.00, 2.00],
+    'qwen-2.5-32b': [0.40, 0.40],
+    'gemma-2-9b': [0.10, 0.10],
+  };
+  return data.data.filter(m => {
+    const slug = normalizeModelSlug(m.id);
+    return CEREBRAS_PRICES[slug] || CEREBRAS_PRICES[m.id];
+  }).map(m => {
+    const slug = normalizeModelSlug(m.id);
+    const prices = CEREBRAS_PRICES[slug] || CEREBRAS_PRICES[m.id];
+    return {
+      sourceModelId: m.id, modelSlug: slug, modelName: m.name || m.id,
+      providerSlug: 'cerebras', input: prices[0], output: prices[1],
+      contextWindow: m.context_window || 8192, maxOutput: null, source: 'cerebras',
+    };
+  });
+}
+
+// SambaNova: OpenAI-compatible, pricing per 1M tokens
+function parseSambaNovaModels(data) {
+  if (!data?.data) return [];
+  const SAMBANOVA_PRICES = {
+    'deepseek-r1': [0.80, 2.40],
+    'deepseek-v3-0324': [0.90, 2.70],
+    'llama-3.3-70b-instruct': [0.60, 0.60],
+    'llama-3.1-8b-instruct': [0.10, 0.10],
+    'llama-3.1-405b-instruct': [2.50, 2.50],
+    'qwen-2.5-72b-instruct': [0.80, 0.80],
+    'gemma-2-9b-it': [0.10, 0.10],
+  };
+  return data.data.filter(m => {
+    const slug = normalizeModelSlug(m.id);
+    return SAMBANOVA_PRICES[slug] || SAMBANOVA_PRICES[m.id];
+  }).map(m => {
+    const slug = normalizeModelSlug(m.id);
+    const prices = SAMBANOVA_PRICES[slug] || SAMBANOVA_PRICES[m.id];
+    return {
+      sourceModelId: m.id, modelSlug: slug, modelName: m.name || m.id,
+      providerSlug: 'sambanova', input: prices[0], output: prices[1],
+      contextWindow: m.context_window || 8192, maxOutput: null, source: 'sambanova',
+    };
+  });
+}
+
+// NVIDIA NIM: OpenAI-compatible, pricing per 1M tokens
+function parseNvidiaNimModels(data) {
+  if (!data?.data) return [];
+  const NVIDIA_PRICES = {
+    'deepseek-ai/deepseek-r1': [0.55, 2.19],
+    'meta/llama-3.3-70b-instruct': [0.20, 0.20],
+    'meta/llama-3.1-8b-instruct': [0.02, 0.02],
+    'meta/llama-3.1-405b-instruct': [2.50, 2.50],
+    'nvidia/llama-3.1-nemotron-ultra-253b-v1': [1.50, 1.50],
+    'qwen/qwen2.5-72b-instruct': [0.50, 0.50],
+    'google/gemma-2-9b-it': [0.05, 0.05],
+    'mistralai/mistral-large-2-instruct': [2.00, 2.00],
+    'minimax/minimax-m2.7': [0.50, 1.50],
+  };
+  return data.data.filter(m => {
+    const slug = normalizeModelSlug(m.id);
+    return NVIDIA_PRICES[slug] || NVIDIA_PRICES[m.id];
+  }).map(m => {
+    const slug = normalizeModelSlug(m.id);
+    const prices = NVIDIA_PRICES[slug] || NVIDIA_PRICES[m.id];
+    return {
+      sourceModelId: m.id, modelSlug: slug, modelName: m.name || m.id,
+      providerSlug: 'nvidia', input: prices[0], output: prices[1],
+      contextWindow: m.context_window || 128000, maxOutput: null, source: 'nvidia',
+    };
+  });
+}
+
+// Hugging Face: OpenAI-compatible router, pricing from model cards
+function parseHuggingFaceModels(data) {
+  if (!data?.data) return [];
+  const HF_PRICES = {
+    'meta-llama-3.1-8b-instruct': [0.05, 0.05],
+    'meta-llama-3.3-70b-instruct': [0.30, 0.30],
+    'mistral-7b-instruct-v0.3': [0.02, 0.02],
+    'qwen2.5-7b-instruct': [0.03, 0.03],
+    'phi-3.5-mini-instruct': [0.03, 0.03],
+    'gemma-2-9b-it': [0.05, 0.05],
+    'deepseek-r1': [0.50, 1.50],
+  };
+  return data.data.filter(m => {
+    const slug = normalizeModelSlug(m.id);
+    return HF_PRICES[slug] || HF_PRICES[m.id];
+  }).map(m => {
+    const slug = normalizeModelSlug(m.id);
+    const prices = HF_PRICES[slug] || HF_PRICES[m.id];
+    return {
+      sourceModelId: m.id, modelSlug: slug, modelName: m.name || m.id,
+      providerSlug: 'huggingface', input: prices[0], output: prices[1],
+      contextWindow: m.context_window || 128000, maxOutput: null, source: 'huggingface',
+    };
+  });
+}
+
 // Artificial Analysis: pricing already per 1M tokens — no multiplication needed
 function parseArtificialAnalysisModels(data) {
   if (!data?.data) return [];
@@ -508,6 +641,10 @@ async function syncAll(env, sourceFilter, clear) {
   if (want('together-ai') && env.TOGETHER_API_KEY) apiFetches.push(['together-ai', fetch('https://api.together.xyz/v1/models', authH(env.TOGETHER_API_KEY))]);
   if (want('groq') && env.GROQ_API_KEY) apiFetches.push(['groq', fetch('https://api.groq.com/openai/v1/models', authH(env.GROQ_API_KEY))]);
   if (want('fireworks') && env.FIREWORKS_API_KEY) apiFetches.push(['fireworks', fetch('https://api.fireworks.ai/inference/v1/models', authH(env.FIREWORKS_API_KEY))]);
+  if (want('cerebras')) apiFetches.push(['cerebras', fetch('https://api.cerebras.ai/v1/models')]);
+  if (want('sambanova')) apiFetches.push(['sambanova', fetch('https://api.sambanova.ai/v1/models')]);
+  if (want('nvidia')) apiFetches.push(['nvidia', fetch('https://integrate.api.nvidia.com/v1/models')]);
+  if (want('huggingface')) apiFetches.push(['huggingface', fetch('https://router.huggingface.co/v1/models')]);
   const AA_KEY = env.ARTIFICIAL_ANALYSIS_API_KEY || 'aa_cMOrZeGwuDNnbGeWCDZytwrSUxDkWrJX';
   if (want('artificialanalysis')) apiFetches.push(['artificialanalysis', fetch('https://artificialanalysis.ai/api/v2/language/models/free', { headers: { 'x-api-key': AA_KEY } })]);
 
@@ -554,6 +691,26 @@ async function syncAll(env, sourceFilter, clear) {
     const p = parseFireworksModels(await apiMap.fireworks.json());
     allParsed.push(...p);
     sourceResults.fireworks = p.length;
+  }
+  if (want('cerebras') && apiMap.cerebras?.ok) {
+    const p = parseCerebrasModels(await apiMap.cerebras.json());
+    allParsed.push(...p);
+    sourceResults.cerebras = p.length;
+  }
+  if (want('sambanova') && apiMap.sambanova?.ok) {
+    const p = parseSambaNovaModels(await apiMap.sambanova.json());
+    allParsed.push(...p);
+    sourceResults.sambanova = p.length;
+  }
+  if (want('nvidia') && apiMap.nvidia?.ok) {
+    const p = parseNvidiaNimModels(await apiMap.nvidia.json());
+    allParsed.push(...p);
+    sourceResults.nvidia = p.length;
+  }
+  if (want('huggingface') && apiMap.huggingface?.ok) {
+    const p = parseHuggingFaceModels(await apiMap.huggingface.json());
+    allParsed.push(...p);
+    sourceResults.huggingface = p.length;
   }
   if (want('artificialanalysis') && apiMap.artificialanalysis?.ok) {
     const aaData = await apiMap.artificialanalysis.json();
