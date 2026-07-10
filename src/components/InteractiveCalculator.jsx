@@ -93,7 +93,10 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
     const batchB = pricingB?.batch_discount_rate ? monthlyB * (1 - pricingB.batch_discount_rate) : null;
 
     const difference = Math.abs(monthlyA - monthlyB);
-    const winner = monthlyA < monthlyB ? 'A' : 'B';
+    const maxCost = Math.max(monthlyA, monthlyB);
+    const COST_EQUALITY_THRESHOLD = 0.01;
+    const costsEqual = maxCost === 0 || (difference / maxCost) <= COST_EQUALITY_THRESHOLD;
+    const winner = costsEqual ? 'tie' : (monthlyA < monthlyB ? 'A' : 'B');
 
     setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner, batchA, batchB });
   }, [inputVal, outputVal, volumeVal, pricingA, pricingB]);
@@ -232,17 +235,27 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Provider A (Winner) */}
+          {/* Provider A */}
           <div className={`rounded-xl p-6 border relative overflow-hidden group ${
             winner === 'A' 
               ? 'border-emerald-400 bg-emerald-100/50 shadow-md shadow-emerald-200' 
-              : 'border-outline-variant bg-white'
+              : winner === 'tie'
+                ? 'border-sky-300 bg-sky-50/50'
+                : 'border-outline-variant bg-white'
           }`}>
             {winner === 'A' && (
               <div className="absolute top-0 right-0 p-3">
                 <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">check</span>
                   Cheapest
+                </span>
+              </div>
+            )}
+            {winner === 'tie' && (
+              <div className="absolute top-0 right-0 p-3">
+                <span className="bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">drag_handle</span>
+                  Same Price
                 </span>
               </div>
             )}
@@ -275,10 +288,10 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
                   <p className="text-xs text-success mt-1 font-medium">With batch: {format(convert(costs.batchA))}</p>
                 )}
                 <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
-                  winner === 'A' ? 'bg-emerald-300' : 'bg-surface-container-high'
+                  winner === 'A' ? 'bg-emerald-300' : winner === 'tie' ? 'bg-sky-200' : 'bg-surface-container-high'
                 }`}>
-                  <div className={`h-full ${winner === 'A' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`} 
-                       style={{width: winner === 'A' ? '60%' : '100%'}}></div>
+                  <div className={`h-full ${winner === 'A' ? 'bg-emerald-600' : winner === 'tie' ? 'bg-sky-500' : 'bg-on-surface-variant'}`} 
+                       style={{width: winner === 'A' ? '60%' : winner === 'tie' ? '80%' : '100%'}}></div>
                 </div>
               </div>
               {/* Provider-specific details */}
@@ -309,13 +322,23 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
           <div className={`rounded-xl p-6 border relative overflow-hidden group ${
             winner === 'B' 
               ? 'border-emerald-400 bg-emerald-100/50 shadow-md shadow-emerald-200' 
-              : 'border-outline-variant bg-white'
+              : winner === 'tie'
+                ? 'border-sky-300 bg-sky-50/50'
+                : 'border-outline-variant bg-white'
           }`}>
             {winner === 'B' && (
               <div className="absolute top-0 right-0 p-3">
                 <span className="bg-success text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
                   <span className="material-symbols-outlined text-[12px]">check</span>
                   Cheapest
+                </span>
+              </div>
+            )}
+            {winner === 'tie' && (
+              <div className="absolute top-0 right-0 p-3">
+                <span className="bg-sky-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-widest shadow-sm flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[12px]">drag_handle</span>
+                  Same Price
                 </span>
               </div>
             )}
@@ -348,10 +371,10 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
                   <p className="text-xs text-success mt-1 font-medium">With batch: {format(convert(costs.batchB))}</p>
                 )}
                 <div className={`mt-2 h-1.5 w-full rounded-full overflow-hidden ${
-                  winner === 'B' ? 'bg-emerald-300' : 'bg-surface-container-high'
+                  winner === 'B' ? 'bg-emerald-300' : winner === 'tie' ? 'bg-sky-200' : 'bg-surface-container-high'
                 }`}>
-                  <div className={`h-full ${winner === 'B' ? 'bg-emerald-600' : 'bg-on-surface-variant'}`}
-                       style={{width: winner === 'B' ? '60%' : '100%'}}></div>
+                  <div className={`h-full ${winner === 'B' ? 'bg-emerald-600' : winner === 'tie' ? 'bg-sky-500' : 'bg-on-surface-variant'}`}
+                       style={{width: winner === 'B' ? '60%' : winner === 'tie' ? '80%' : '100%'}}></div>
                 </div>
               </div>
               {/* Provider-specific details */}
@@ -380,21 +403,29 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
         </div>
 
         {/* Savings Banner - Matching Stitch design */}
-        <div className="p-5 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-center justify-between">
+        <div className={`p-5 border rounded-xl flex items-center justify-between ${
+          costsEqual ? 'bg-sky-50/50 border-sky-100' : 'bg-emerald-50/50 border-emerald-100'
+        }`}>
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center text-success">
-              <span className="material-symbols-outlined text-[20px]">savings</span>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+              costsEqual ? 'bg-sky-100 text-sky-600' : 'bg-success/10 text-success'
+            }`}>
+              <span className="material-symbols-outlined text-[20px]">{costsEqual ? 'balance' : 'savings'}</span>
             </div>
             <div>
-              <p className="font-bold text-emerald-700 leading-none">Estimated Savings ({getUnitLabel()})</p>
-              <p className="text-sm text-emerald-600/80 mt-1">
-                Calculated against standard hyperscaler pricing (AWS Bedrock, Vertex AI)
+              <p className={`font-bold leading-none ${costsEqual ? 'text-sky-700' : 'text-emerald-700'}`}>
+                {costsEqual ? 'Same Price' : `Estimated Savings (${getUnitLabel()})`}
+              </p>
+              <p className={`text-sm mt-1 ${costsEqual ? 'text-sky-600/80' : 'text-emerald-600/80'}`}>
+                {costsEqual
+                  ? 'Both providers offer identical pricing for this model'
+                  : 'Calculated against standard hyperscaler pricing (AWS Bedrock, Vertex AI)'}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="font-metric-display text-2xl text-success">
-              {format(convert(difference))}
+            <p className={`font-metric-display text-2xl ${costsEqual ? 'text-sky-600' : 'text-success'}`}>
+              {costsEqual ? '--' : format(convert(difference))}
             </p>
           </div>
         </div>
@@ -418,12 +449,12 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
           </div>
           <div className="flex justify-end">
             <a 
-              href={ensureHttps(winner === 'A' ? providerA?.affiliate_url : providerB?.affiliate_url)}
+              href={ensureHttps(winner === 'A' ? providerA?.affiliate_url : winner === 'B' ? providerB?.affiliate_url : providerA?.affiliate_url)}
               target="_blank"
               rel="noopener noreferrer"
               className="bg-primary hover:bg-primary-container text-white px-8 py-4 rounded-xl font-bold flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0 shadow-lg shadow-primary/20"
             >
-              {winner === 'A' ? providerA?.name : providerB?.name} Pricing
+              {winner === 'A' ? providerA?.name : winner === 'B' ? providerB?.name : `${providerA?.name} Pricing`}
               <span className="material-symbols-outlined">open_in_new</span>
             </a>
           </div>
