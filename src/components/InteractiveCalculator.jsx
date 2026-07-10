@@ -51,6 +51,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
     singleB: 0, monthlyB: 0,
     difference: 0,
     winner: 'A',
+    costsEqual: false,
     batchA: null, batchB: null,
   });
 
@@ -98,7 +99,7 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
     const costsEqual = maxCost === 0 || (difference / maxCost) <= COST_EQUALITY_THRESHOLD;
     const winner = costsEqual ? 'tie' : (monthlyA < monthlyB ? 'A' : 'B');
 
-    setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner, batchA, batchB });
+    setCosts({ singleA, monthlyA, singleB, monthlyB, difference, winner, costsEqual, batchA, batchB });
   }, [inputVal, outputVal, volumeVal, pricingA, pricingB]);
 
   // 3. Format cost based on selected unit
@@ -404,28 +405,28 @@ export default function InteractiveCalculator({ model, providerA, providerB, pri
 
         {/* Savings Banner - Matching Stitch design */}
         <div className={`p-5 border rounded-xl flex items-center justify-between ${
-          costsEqual ? 'bg-sky-50/50 border-sky-100' : 'bg-emerald-50/50 border-emerald-100'
+          costs.costsEqual ? 'bg-sky-50/50 border-sky-100' : 'bg-emerald-50/50 border-emerald-100'
         }`}>
           <div className="flex items-center gap-3">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              costsEqual ? 'bg-sky-100 text-sky-600' : 'bg-success/10 text-success'
+              costs.costsEqual ? 'bg-sky-100 text-sky-600' : 'bg-success/10 text-success'
             }`}>
-              <span className="material-symbols-outlined text-[20px]">{costsEqual ? 'balance' : 'savings'}</span>
+              <span className="material-symbols-outlined text-[20px]">{costs.costsEqual ? 'balance' : 'savings'}</span>
             </div>
             <div>
-              <p className={`font-bold leading-none ${costsEqual ? 'text-sky-700' : 'text-emerald-700'}`}>
-                {costsEqual ? 'Same Price' : `Estimated Savings (${getUnitLabel()})`}
+              <p className={`font-bold leading-none ${costs.costsEqual ? 'text-sky-700' : 'text-emerald-700'}`}>
+                {costs.costsEqual ? 'Same Price' : `Estimated Savings (${getUnitLabel()})`}
               </p>
-              <p className={`text-sm mt-1 ${costsEqual ? 'text-sky-600/80' : 'text-emerald-600/80'}`}>
-                {costsEqual
+              <p className={`text-sm mt-1 ${costs.costsEqual ? 'text-sky-600/80' : 'text-emerald-600/80'}`}>
+                {costs.costsEqual
                   ? 'Both providers offer identical pricing for this model'
                   : 'Calculated against standard hyperscaler pricing (AWS Bedrock, Vertex AI)'}
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className={`font-metric-display text-2xl ${costsEqual ? 'text-sky-600' : 'text-success'}`}>
-              {costsEqual ? '--' : format(convert(difference))}
+            <p className={`font-metric-display text-2xl ${costs.costsEqual ? 'text-sky-600' : 'text-success'}`}>
+              {costs.costsEqual ? '--' : format(convert(difference))}
             </p>
           </div>
         </div>
